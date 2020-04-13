@@ -42,7 +42,7 @@ def write_cftc_report(df_dict,host,measurement):
         fields = fields_data_clean(fields_raw)
         tags = {} 
         tags.update({"CFTC_Contract_Market_Code":data["CFTC_Contract_Market_Code"]})
-        dbtime = df_dict[0]['Report_Date_as_MM_DD_YYYY']#datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
+        dbtime = False#df_dict[0]['Report_Date_as_MM_DD_YYYY']#datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
         host.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
