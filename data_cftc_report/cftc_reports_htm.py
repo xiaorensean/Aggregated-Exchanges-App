@@ -31,10 +31,3 @@ def get_report_links(reports):
 
 # report "/dea/futures/deacmesf.htm"
 all_reports_links = get_report_links("/dea")
-
-
-report_url = "https://www.cftc.gov/dea/newcot/deafut.txt"
-page = requests.get(report_url)
-soup = bs(page.text, 'html.parser')
-soup2 = soup.text
-
