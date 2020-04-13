@@ -26,10 +26,11 @@ def read_files(host,measurement):
 
 def write_cftc_report(df_dict,host,measurement):
     for data in df_dict:
+        print(data)
         fields = {dd:data[dd] for dd in data if dd != "CFTC_Contract_Market_Code" and dd != "Report_Date_as_MM_DD_YYYY"}
         tags = {} 
         tags.update({"CFTC_Contract_Market_Code":data["CFTC_Contract_Market_Code"]})
-        dbtime = False#datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
+        dbtime = datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
         host.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
