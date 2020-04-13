@@ -14,7 +14,8 @@ host_1 = InfluxClientHost1()
 host_2 = InfluxClientHost2()
 
 
-measurement = "test_cftc"#"cftc_futures_report"
+measurement = "cftc_futures_report"
+
 
 def fields_data_clean(df_dict):
     fields = {}
@@ -26,7 +27,7 @@ def fields_data_clean(df_dict):
     return fields
 
 
-def read_files(host,measurement):
+def write_all_data(host,measurement):
     all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
     for file in all_file:
         print("Writing " + file)
@@ -50,6 +51,6 @@ def write_cftc_report(df_dict,host,measurement):
 
 
 
-
 if __name__ == "__main__":
-    read_files(host_1,measurement)
+    write_all_data(host_1,measurement)
+    write_all_data(host_2,measurement)
