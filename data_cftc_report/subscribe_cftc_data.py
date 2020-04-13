@@ -25,8 +25,9 @@ def read_files(host,measurement):
 
 
 def write_cftc_report(df_dict,host,measurement):
+    count = 0 
     for data in df_dict:
-        print(data)
+        count += 1
         fields = {dd:data[dd] for dd in data if dd != "CFTC_Contract_Market_Code" and dd != "Report_Date_as_MM_DD_YYYY"}
         tags = {} 
         tags.update({"CFTC_Contract_Market_Code":data["CFTC_Contract_Market_Code"]})
@@ -34,11 +35,10 @@ def write_cftc_report(df_dict,host,measurement):
         host.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
-#all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
-#df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
-#df_dict_raw = df.T.to_dict()
-#df_dict = [df_dict_raw[i] for i in df_dict_raw]
-#dt = 
+all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
+df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
+df_dict_raw = df.T.to_dict()
+df_dict = [df_dict_raw[i] for i in df_dict_raw] 
 
 
 if __name__ == "__main__":
