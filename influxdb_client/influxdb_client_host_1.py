@@ -157,7 +157,7 @@ if __name__ == '__main__':
     #bitmex_leaderboard_notional = db.query_tables('bitmex_leaderboard_notional',["*",""])
 
     #query = db.query_tables('okex_longShortPositionRatio',["*",""])
-    #db.delete('test_cftc',"2018-08-28 00:02:02",None)
+    db.delete('test_cftc',"1980-08-28 00:02:02",None)
 
 
 
