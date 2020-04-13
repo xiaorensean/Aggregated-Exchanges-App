@@ -137,7 +137,7 @@ if __name__ == '__main__':
     print(tag)
     #a = db.show_keys("SHOW TAG KEYS")
     a = db.query_tables('test_cftc',['*',""])
-    print(a.Report_Date_as_MM_DD_YYYY.tolist())
+    print(a.time.tolist())
     print(a.shape)
     #print(a.to_string())
     #a1 = a.to_dict()
