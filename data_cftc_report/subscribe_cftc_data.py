@@ -48,8 +48,9 @@ def write_cftc_report(df_dict,host,measurement):
 
 #all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
 #df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
+#code = list(set(df.CFTC_Contract_Market_Code.tolist()))
 #df_dict_raw = df.T.to_dict()
-#df_dict = [df_dict_raw[i] for i in df_dict_raw][80]
+#df_dict = [df_dict_raw[i] for i in df_dict_raw]
 
 
 
