@@ -16,6 +16,16 @@ host_2 = InfluxClientHost2()
 
 measurement = "test_cftc"#"cftc_futures_report"
 
+def fields_data_clean(df_dict):
+    fields = {}
+    for i in df_dict:
+        if str(df_dict[i]) == "nan":
+            fields.update({i:None})
+        else:
+            fields.update({i:df_dict[i]})
+    return fields
+
+
 def read_files(host,measurement):
     all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
     df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
@@ -25,20 +35,22 @@ def read_files(host,measurement):
 
 
 def write_cftc_report(df_dict,host,measurement):
-    count = 0 
+    
     for data in df_dict:
-        count += 1
-        fields = {dd:data[dd] for dd in data if dd != "CFTC_Contract_Market_Code" and dd != "Report_Date_as_MM_DD_YYYY"}
+        # filter for tags and time
+        fields_raw = {dd:data[dd] for dd in data if dd != "CFTC_Contract_Market_Code" and dd != "Report_Date_as_MM_DD_YYYY"}
+        fields = fields_data_clean(fields_raw)
         tags = {} 
         tags.update({"CFTC_Contract_Market_Code":data["CFTC_Contract_Market_Code"]})
-        dbtime = datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
+        dbtime = df_dict[0]['Report_Date_as_MM_DD_YYYY']#datetime.datetime.strptime(str(df_dict[0]['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")
         host.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
-all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
-df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
-df_dict_raw = df.T.to_dict()
-df_dict = [df_dict_raw[i] for i in df_dict_raw] 
+#all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
+#df = pd.read_excel(current_dir + "/deafut/" + all_file[-1])
+#df_dict_raw = df.T.to_dict()
+#df_dict = [df_dict_raw[i] for i in df_dict_raw][80]
+
 
 
 if __name__ == "__main__":
