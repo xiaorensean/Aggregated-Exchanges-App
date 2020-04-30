@@ -136,7 +136,7 @@ if __name__ == '__main__':
     #tag = db.get_tag_values('test_cftc','CFTC_Contract_Market_Code')
     #print(tag)
     #a = db.show_keys("SHOW TAG KEYS")
-    a = db.query_tables('test_deribit_ticker',['*',""])
+    a = db.query_tables('deribit_tickers',['*',""])
     print(a.to_string())
     #tags_temp = list(db.client.query("SHOW tag values from FTX_trades with key = symbol"))
     #tags_temp_c = tags_temp.copy()
