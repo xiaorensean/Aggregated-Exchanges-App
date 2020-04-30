@@ -27,7 +27,7 @@ def symbol_btc_cluster(num):
     return ss
 
 #eth_symbols = [symb for symb in symbols  if "ETH" in symb]
-num = 100
+num = 200
 symbols_clus = symbol_btc_cluster(num)
 print(len(symbols_clus))
 def write_ticker_data(measurement,d):
