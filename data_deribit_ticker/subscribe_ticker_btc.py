@@ -26,10 +26,15 @@ def symbol_btc_cluster(num):
         ss.append(s)
     return ss
 
-#eth_symbols = [symb for symb in symbols  if "ETH" in symb]
+def symbol_btc():
+    symbols = [i['instrumentName'] for i in deribit.getinstruments()]
+    btc_symbols = [symb for symb in symbols  if "BTC" in symb]
+    return btc_symbols
+
 num = 200
 symbols_clus = symbol_btc_cluster(num)
-print(len(symbols_clus))
+btc_symbols = symbol_btc()
+
 def write_ticker_data(measurement,d):
     fields = {}
     try:
@@ -94,9 +99,10 @@ def write_ticker_data(measurement,d):
 # get tickers
 a = time.time()
 datas = []
-for s in symbols_clus[0]:
+for s in btc_symbols:
     try:
         data = deribit.getsummary(s)
+        time.sleep(0.01)
         write_ticker_data(measurement, data)
     except Exception as err:
         print(err)
