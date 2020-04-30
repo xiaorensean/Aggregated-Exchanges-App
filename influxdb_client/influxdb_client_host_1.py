@@ -137,6 +137,7 @@ if __name__ == '__main__':
     #print(tag)
     #a = db.show_keys("SHOW TAG KEYS")
     a = db.query_tables('test_deribit_ticker',['*',""])
+    print(a.to_string())
     #print(a.shape)
     #print(a.to_string())
     #a1 = a.to_dict()
