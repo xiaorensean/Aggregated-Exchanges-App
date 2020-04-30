@@ -1,14 +1,9 @@
-'''
-Main script
-Spawns individual scripts that collect data from exchanges
-Constantly checks that all the scripts are running, if any script stops for whatever reason, restart it
-'''
-
 
 import os
 from time import sleep
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+pkg_dir =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(pkg_dir)
 
 import multiprocessing
 
@@ -57,7 +52,7 @@ if __name__ == "__main__":
 				processes.append(create_process(directory, scriptname))
 				print(directory + "/" + scriptname )
 		sleep(1)
-   
+
 
 
 
