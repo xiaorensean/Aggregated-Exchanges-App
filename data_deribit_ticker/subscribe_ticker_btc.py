@@ -9,6 +9,8 @@ from time import sleep
 sys.path.append(os.path.dirname(current_dir))
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from api_deribit.DeribitRestApi import RestClient
+from utility.error_logger_writer import logger
+
 
 db = InfluxClientHost1()
 deribit = RestClient()
@@ -31,8 +33,9 @@ def symbol_btc():
     btc_symbols = [symb for symb in symbols  if "BTC" in symb]
     return btc_symbols
 
-num = 200
-symbols_clus = symbol_btc_cluster(num)
+#num = 200
+#symbols_clus = symbol_btc_cluster(num)
+
 btc_symbols = symbol_btc()
 
 def write_ticker_data(measurement,d):
@@ -97,8 +100,6 @@ def write_ticker_data(measurement,d):
 
 
 # get tickers
-a = time.time()
-datas = []
 for s in btc_symbols:
     try:
         data = deribit.getsummary(s)
@@ -106,8 +107,7 @@ for s in btc_symbols:
         write_ticker_data(measurement, data)
     except Exception as err:
         print(err)
-a1 = time.time()
-print(a1-a)
+
 
 
 

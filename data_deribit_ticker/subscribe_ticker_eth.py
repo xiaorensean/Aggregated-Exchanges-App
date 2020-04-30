@@ -2,36 +2,31 @@ import time
 import os 
 import sys 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-from deribit_api.deribitRestApi import RestClient
 import multiprocessing
 import json
 from time import sleep
 
 sys.path.append(os.path.dirname(current_dir))
-from influxdb_client.influxdb_client_v1 import InfluxClient
+from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
+from api_deribit.DeribitRestApi import RestClient
+from utility.error_logger_writer import logger
 
-db = InfluxClient()
+
+db = InfluxClientHost1()
 deribit = RestClient()
 #measurement = "deribit_ticker_all_symbol"
 measurement = "test_deribit_ticker"
 
-def symbol_eth_cluster(num):
+
+def symbol_eth():
     symbols = [i['instrumentName'] for i in deribit.getinstruments()]
-    eth_symbols = [symb for symb in symbols  if "ETH" in symb]
-    clusters = str(len(btc_symbols)/num)
-    integ = int(clusters.split(".")[0])
-    ss = []
-    for i in range(integ+1):
-        s = btc_symbols[num*i:num*(i+1)]
-        ss.append(s)
-    return ss
+    btc_symbols = [symb for symb in symbols  if "ETH" in symb]
+    return btc_symbols
 
 
-num = 100
-symbols_clus = symbol_eth_cluster(num)
+eth_symbols = symbol_eth()
 
-def write_ticker(measurement,d):
+def write_ticker_data(measurement,d):
     fields = {}
     try:
         fields.update({"askPrice":float(d["askPrice"])})
@@ -70,7 +65,10 @@ def write_ticker(measurement,d):
         fields.update({"open_interest":float(d["openInterest"])})
     except:
         fields.update({"open_interest":None})
-    fields.update({"uIx":d["uIx"]})
+    try:
+        fields.update({"uIx":d["uIx"]})
+    except: 
+        fields.update({"uIx":None})
     try:
         fields.update({"uPx":float(d["uPx"])})
     except:
@@ -87,18 +85,17 @@ def write_ticker(measurement,d):
     tags.update({"instrument_name":d["instrumentName"]})
     dbtime = False
     db.write_points_to_measurement(measurement, dbtime, tags, fields)
-'''
+
+
 # get tickers
-a = time.time()
-datas = []
-for s in symbols_clus[0]:
+for s in eth_symbols:
     try:
         data = deribit.getsummary(s)
-        datas.append(data)
+        time.sleep(0.01)
+        write_ticker_data(measurement, data)
     except Exception as err:
         print(err)
-a1 = time.time()
-print(a1-a)
-'''
+
+
 
 

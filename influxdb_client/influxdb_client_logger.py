@@ -9,18 +9,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 #HOST_1_old = 'ec2-35-183-41-80.ca-central-1.compute.amazonaws.com'
 #HOST_2_old = 'ec2-35-183-244-102.ca-central-1.compute.amazonaws.com'
 HOST_1 = "ec2-35-183-117-153.ca-central-1.compute.amazonaws.com"
-HOST_2 = "ec2-35-182-170-72.ca-central-1.compute.amazonaws.com"
-
+HOST_2 = "ec2-15-223-67-67.ca-central-1.compute.amazonaws.com"
+HOST_3 = "ec2-99-79-76-134.ca-central-1.compute.amazonaws.com"
 # database name
 database = 'md_rates'
 
 
-class InfluxClientHost1:
+class InfluxClient:
     
     def __init__(self):        
         user_name = 'xren'
         passwords = '5X%UZ^Xa.bH@9Ze6'         
-        self.client = InfluxDBClient(host=HOST_1, port=8086, username=user_name, password=passwords)
+        self.client = InfluxDBClient(host=HOST_3, port=8086, username=user_name, password=passwords)
         self.client.switch_database(database)
         #self.dfclient = DataFrameClient(host=HOST,port=8086, username=user_name, password=passwords)
     
@@ -55,11 +55,7 @@ class InfluxClientHost1:
             fields_type.update({item:list_results[idx]})
         return fields_type
     
-
-    def show_series(self):
-        all_series = list(self.client.query("SHOW SERIES"))
-        return all_series
-        
+    
     # query the results
     def query_tables(self,table_name, conditions,raw=None):
         #self.client.switch_database(db_name)
@@ -73,7 +69,7 @@ class InfluxClientHost1:
         if raw is None:
             result = df
         else:
-            result = list(query_results)[0]
+            result = list(query_results)
         return result
 
     # get tag values
@@ -130,16 +126,14 @@ class InfluxClientHost1:
       
 
 if __name__ == '__main__':
-    db = InfluxClientHost1()
+    db = InfluxClient()
     db_names = db.client.get_list_database()
-    #tables = db.get_table_name()
-    #tag = db.get_tag_values('test_cftc','CFTC_Contract_Market_Code')
-    #print(tag)
-    #a = db.show_keys("SHOW TAG KEYS")
-    a = db.query_tables('test_deribit_ticker',['*',""])
+    tables = db.get_table_name()
+    #a = db.get_tag_values('exchange_open_interest','')
+    a = db.query_tables('errorlog',['*',"where dbhost ='host1' and table_name = 'bybit_tickers' order by time desc limit 10000;"])
+    #a1 = a[a.tag == "BTC-8MAY20-5500-C"]
     #print(a.shape)
     #print(a.to_string())
-    #a1 = a.to_dict()
     #tags_temp = list(db.client.query("SHOW tag values from FTX_trades with key = symbol"))
     #tags_temp_c = tags_temp.copy()
     #tags = tags_temp_c[0]
@@ -157,8 +151,10 @@ if __name__ == '__main__':
     #bitmex_leaderboard_notional = db.query_tables('bitmex_leaderboard_notional',["*",""])
 
     #query = db.query_tables('okex_longShortPositionRatio',["*",""])
-    #db.delete('test_cftc',"1980-08-28 00:02:02",None)
-
+    #db.delete("test_huobidm_liquidation",None,"1980-08-28 00:02:02")
+    #db.delete('test_bfx_lb',None,"1980-08-28 00:02:02")
+    #db.delete('test_bfx_lb1',None,"1980-08-28 00:02:02")
+    #db.delete('test_bfx_lb2',None,"1980-08-28 00:02:02")
 
 
 
