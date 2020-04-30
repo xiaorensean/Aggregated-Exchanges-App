@@ -1,3 +1,4 @@
+import traceback
 import time
 import os 
 import sys 
@@ -6,7 +7,7 @@ import multiprocessing
 import json
 from time import sleep
 
-sys.path.append(os.path.dirname(current_dir))
+sys.path.append(os.path.dirname(os.path.dirname(current_dir)))
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from api_deribit.DeribitRestApi import RestClient
 from utility.error_logger_writer import logger
@@ -14,8 +15,8 @@ from utility.error_logger_writer import logger
 
 db = InfluxClientHost1()
 deribit = RestClient()
-#measurement = "deribit_ticker_all_symbol"
-measurement = "test_deribit_ticker"
+measurement = "deribit_tickers"
+#measurement = "test_deribit_ticker"
 
 def symbol_btc_cluster(num):
     symbols = [i['instrumentName'] for i in deribit.getinstruments()]
@@ -33,10 +34,6 @@ def symbol_btc():
     btc_symbols = [symb for symb in symbols  if "BTC" in symb]
     return btc_symbols
 
-#num = 200
-#symbols_clus = symbol_btc_cluster(num)
-
-btc_symbols = symbol_btc()
 
 def write_ticker_data(measurement,d):
     fields = {}
@@ -100,14 +97,24 @@ def write_ticker_data(measurement,d):
 
 
 # get tickers
-for s in btc_symbols:
-    try:
-        data = deribit.getsummary(s)
-        time.sleep(0.01)
-        write_ticker_data(measurement, data)
-    except Exception as err:
-        print(err)
+def subscribe_tickers(measurement):
+    btc_symbols = symbol_btc()
+    for s in btc_symbols:
+        try:
+            data = deribit.getsummary(s)
+            time.sleep(0.01)
+            write_ticker_data(measurement, data)
+        except Exception as err:
+            error = traceback.format_exc()
+            logger(measurement,error,s)
 
+
+
+if __name__ == "__main__":
+    subscribe_tickers(measurement)
+    while True:
+        time.sleep(60)
+        subscribe_tickers(measurement)
 
 
 
