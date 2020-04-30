@@ -21,9 +21,6 @@ def create_process(directory, scriptname):
 	process = multiprocessing.Process(target=resubscribe.run_forever, args=(directory, scriptname))
 	process.start()
 
-	with open(process_logger, "a+") as f:
-		lines = ['----------\n', directory + "/" + scriptname + "\n", str(process.pid) + "\n", '----------\n']
-		f.writelines(lines)
 	entry = {
 		"directory": directory,
 		"scriptname": scriptname,
@@ -32,7 +29,6 @@ def create_process(directory, scriptname):
 	return entry
 
 if __name__ == "__main__":
-	open(process_logger, 'w').close()
 	restart = False
 
 	for script in scripts:
