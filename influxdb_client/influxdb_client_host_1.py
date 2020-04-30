@@ -136,8 +136,8 @@ if __name__ == '__main__':
     #tag = db.get_tag_values('test_cftc','CFTC_Contract_Market_Code')
     #print(tag)
     #a = db.show_keys("SHOW TAG KEYS")
-    a = db.query_tables('test_deribit_ticker',['*',""])
-    print(a.to_string())
+    #a = db.query_tables('test_deribit_ticker',['*',""])
+    #print(a.to_string())
     #print(a.shape)
     #print(a.to_string())
     #a1 = a.to_dict()
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     #bitmex_leaderboard_notional = db.query_tables('bitmex_leaderboard_notional',["*",""])
 
     #query = db.query_tables('okex_longShortPositionRatio',["*",""])
-    #db.delete('test_cftc',"1980-08-28 00:02:02",None)
+    db.delete('test_deribit_ticker',"1980-08-28 00:02:02",None)
 
 
 
