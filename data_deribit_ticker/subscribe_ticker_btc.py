@@ -69,7 +69,10 @@ def write_ticker_data(measurement,d):
         fields.update({"open_interest":float(d["openInterest"])})
     except:
         fields.update({"open_interest":None})
-    fields.update({"uIx":d["uIx"]})
+    try:
+        fields.update({"uIx":d["uIx"]})
+    except: 
+        fields.update({"uIx":None})
     try:
         fields.update({"uPx":float(d["uPx"])})
     except:
