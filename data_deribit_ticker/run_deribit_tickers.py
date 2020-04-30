@@ -8,13 +8,11 @@ Constantly checks that all the scripts are running, if any script stops for what
 import os
 from time import sleep
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import multiprocessing
 
 from utility import resubscribe
-
-process_logger = "logger/open_interest.txt"
 
 processes = []
 
