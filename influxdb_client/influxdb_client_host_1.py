@@ -136,7 +136,7 @@ if __name__ == '__main__':
     #tag = db.get_tag_values('test_cftc','CFTC_Contract_Market_Code')
     #print(tag)
     #a = db.show_keys("SHOW TAG KEYS")
-    a = db.query_tables('deribit_tickers',['*',""])
+    a = db.query_tables('test_deribit_ticker',['*',""])
     print(a.to_string())
     #tags_temp = list(db.client.query("SHOW tag values from FTX_trades with key = symbol"))
     #tags_temp_c = tags_temp.copy()
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     #bitmex_leaderboard_notional = db.query_tables('bitmex_leaderboard_notional',["*",""])
 
     #query = db.query_tables('okex_longShortPositionRatio',["*",""])
-    db.delete('test_deribit_ticker',"1980-08-28 00:02:02",None)
+    #db.delete('test_deribit_ticker',"1980-08-28 00:02:02",None)
 
 
 
