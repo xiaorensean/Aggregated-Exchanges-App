@@ -26,8 +26,7 @@ def get_swap_tickers(base_token):
     data = resp['data']
     return data
 
-
-def swap_ticker_update(swap_data,measurement):
+def swap_usd_update(swap_data,measurement):
     for sd in swap_data:
         fields = {}
         usd_oi = float(sd['holdAmount']) * float(sd['unitAmount'])
@@ -41,12 +40,25 @@ def swap_ticker_update(swap_data,measurement):
         dbtime = False
         host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
+def swap_usdt_update(swap_data,measurement):
+    for sd in swap_data:
+        fields = {}
+        coin_oi = float(sd['holdAmount']) * float(sd['unitAmount'])
+        usd_oi = coin_oi * float(sd['close'])
+        fields.update({"coin_denominated_open_interest":float(coin_oi)})
+        fields.update({"coin_denominated_symbol":sd['coinName']})
+        fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        tags = {}
+        tags.update({"contract_symbol":sd['contract']})
+        tags.update({"contract_exchange":"Okex"})
+        dbtime = False
+        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
 def subscribe_swap_ticker(measurement):
     usd_swap = get_swap_tickers("USD")
+    swap_usd_update(usd_swap,measurement)
     usdt_swap = get_swap_tickers("USDT")  
-    swap_data = usd_swap + usdt_swap
-    swap_ticker_update(swap_data,measurement)
+    swap_usdt_update(usdt_swap,measurement)
 
 
 

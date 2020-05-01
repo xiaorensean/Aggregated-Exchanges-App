@@ -42,7 +42,7 @@ def post_ticker_info(param):
 
 
 # collect usdt denomination 
-def data_collection(symbols):
+def data_collection_usd(symbols):
     usdt_symbol_data = []
     for symb in symbols:
         param = {"symbol":symb}
@@ -74,6 +74,37 @@ def data_collection(symbols):
         usdt_symbol_clean.append(fields)
     return usdt_symbol_clean
 
+# collect usdt denomination 
+def data_collection_usdt(symbols):
+    usdt_symbol_data = []
+    for symb in symbols:
+        param = {"symbol":symb}
+        try:
+            data = post_ticker_info(param)
+        except UnboundLocalError:
+            data = []
+        usdt_symbol_data += data
+    usdt_symbol_clean = []
+    #current_snapshot = str(datetime.datetime.now())
+    for symb_data in usdt_symbol_data:
+        fields = {}
+        # add symbol
+        symbol = symb_data['symbol']
+        contractId = symb_data['contractId']
+        symbol_temp = symbol.split("_")
+        symbol_char = symbol_temp[-1] + "-" + symbol_temp[1]
+        symbol_char = symbol_char.upper()
+        symbol_new = symbol_char + "-" + str(contractId)[2:8] 
+        # add open interest
+        coin_oi = symb_data['holdAmount']
+        usd_oi = symb_data['holdAmount'] * float(symb_data["buy"])
+        fields.update({"coin_denominated_open_interest":float(coin_oi)})
+        fields.update({"coin_denominated_symbol":symbol_new.split("-")[0]})
+        fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"contract_symbol":symbol_new})
+        fields.update({"contract_exchange":"Okex"})
+        usdt_symbol_clean.append(fields)
+    return usdt_symbol_clean
 
 
 def subscribe_open_interest(measurement):
@@ -81,8 +112,8 @@ def subscribe_open_interest(measurement):
     all_tickers = get_tickers()
     symbol_usdt = all_tickers[0]
     symbol_usd = all_tickers[1]
-    usdt_symbol_data = data_collection(symbol_usdt)
-    usd_symbol_data = data_collection(symbol_usd)
+    usdt_symbol_data = data_collection_usdt(symbol_usdt)
+    usd_symbol_data = data_collection_usd(symbol_usd)
     all_symbols_data = all_symbols_data + usdt_symbol_data + usd_symbol_data
     
     for asd in all_symbols_data:
