@@ -102,8 +102,8 @@ print(dfk)
 
 
 df = pd.concat([dfb,dfc,dfh,dfo,dfk])
+df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
 print(df)
-
 
 
 
