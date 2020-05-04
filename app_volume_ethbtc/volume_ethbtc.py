@@ -11,7 +11,7 @@ from api_huobi.HuobiRestApi import get_spot_market_info
 from api_okex.OkexRestApi import get_spot_tickers
 from api_kraken.KrakenRestApi import get_tickers
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-pd.set_option('display.float_format', lambda x: '%.7f' % x)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
@@ -29,6 +29,17 @@ def write_log(exchange,btc_volume,eth_volume):
     db.write_points_to_measurement(measurement, time, tags, fields)    
 
 
+def data_df(exchange,btc_volume,eth_volume):
+    dbb = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
+    btc_volume_delta = btc_volume - dbb['btc_volume'].tolist()[0]
+    eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
+    btc_volume_per = str((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100)+"%"
+    eth_volume_per = str((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100)+"%"
+    dfb = pd.DataFrame([exchange,btc_volume,btc_volume_delta,btc_volume_per,eth_volume,eth_volume_delta,eth_volume_per])
+    dfb = dfb.T
+    return dfb
+
+
 # binance
 # quote volume is in BTC
 symbol_binance = "ETHBTC"
@@ -36,13 +47,7 @@ data_binance = get_spot24(symbol_binance)
 exchange_b = "Binance"
 btc_volume_b = float(data_binance['quoteVolume'])
 eth_volume_b = float(data_binance['volume'])
-dbb = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
-btc_volume_delta = btc_volume_b - dbb['btc_volume'].tolist()[0]
-eth_volume_delta = eth_volume_b - dbb['eth_volume'].tolist()[0]
-btc_volume_per = str((btc_volume_b - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100)+"%"
-eth_volume_per = str((eth_volume_b - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100)+"%"
-dfb = pd.DataFrame([exchange_b,btc_volume_b,btc_volume_delta,btc_volume_per,eth_volume_b,eth_volume_delta,eth_volume_per])
-dfb = dfb.T
+dfb = data_df(exchange_b,btc_volume_b,eth_volume_b)
 print(dfb)
 #write_log(exchange_b, btc_volume_b, eth_volume_b)
 
