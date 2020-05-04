@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -121,8 +122,15 @@ def volume_report():
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
     smtp.login("xiao@virgilqr.com","921211Rx")
-    #smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
+    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
     smtp.quit()
 
-volume_report()
+if __name__ == "__main__":
+    volume_report()
+    while True:
+        time.sleep(60*60)
+        try:
+            volume_report()
+        except: 
+            pass
