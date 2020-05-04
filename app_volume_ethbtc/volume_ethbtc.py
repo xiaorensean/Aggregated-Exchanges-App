@@ -121,20 +121,21 @@ def volume_report():
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
 
-    #smtp = smtplib.SMTP('smtp.gmail.com',587)
-    smtp = smtplib.SMTP_SSL('smtp.gmail.com')
-    smtp.set_debuglevel(1)
-    #smtp.starttls()
+    smtp = smtplib.SMTP('smtp.gmail.com',587)
+    #smtp = smtplib.SMTP_SSL('smtp.gmail.com')
+    #smtp.set_debuglevel(1)
+    smtp.starttls()
     smtp.login("xiao@virgilqr.com","921211Rx")
-    #smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
+    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
     volume_report()
-    #while True:
-    #    time.sleep(60*60)
-    #    try:
-    #        volume_report()
-    #    except: 
-    #        pass
+    while True:
+        time.sleep(60*60)
+        try:
+            volume_report()
+        except: 
+            time.sleep(60*60)
+            pass
