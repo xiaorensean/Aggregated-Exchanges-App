@@ -103,6 +103,8 @@ def volume_report():
     df = pd.concat([dfb,dfc,dfh,dfo,dfk])
     df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
     report = df.to_html(index=False)   
+    
+    # gmail part
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "ETHBTC Volume Report"
     msg['From'] = 'xiao@virgilqr.com'
@@ -121,7 +123,7 @@ def volume_report():
 
     #smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp = smtplib.SMTP_SSL('smtp.gmail.com')
-    smtp.starttls()
+    #smtp.starttls()
     smtp.login("xiao@virgilqr.com","921211Rx")
     smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
     #smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
