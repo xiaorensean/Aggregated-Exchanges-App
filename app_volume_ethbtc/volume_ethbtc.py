@@ -101,3 +101,10 @@ print(dfk)
 #write_log(exchange_k, btc_volume_k, eth_volume_k)
 
 
+df = pd.concat([dfb,dfc,dfh,dfo,dfk],axis=1)
+print(df)
+
+
+
+
+
