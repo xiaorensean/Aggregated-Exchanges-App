@@ -3,6 +3,7 @@ import requests
 base_url_future =  "https://fapi.binance.com/"
 base_url_spot_ajax = "https://www.binance.com/api/"
 base_url_future_ajax = "https://www.binance.com/fapi/"
+base_url_spot = "https://api.binance.com"
 
 def get_exchange_info_future_stats():
     endpoint = base_url_future_ajax+"v1/exchangeInfo"
@@ -67,6 +68,11 @@ def get_future_stats_taker_buy_sell_volume(symbol,period,start_ts=None,end_ts=No
     data = response.json()
     return data
 
+def get_spot24(symbol):
+    url = base_url_spot + "/api/v3/ticker/24hr?symbol={}".format(symbol)
+    response = requests.get(url)
+    data = response.json()
+    return data
 
 def post_open_interest(symbol,period):
     oi_endpoint = "https://www.binance.com/gateway-api/v1/public/future/data/open-interest-stats"

@@ -259,6 +259,15 @@ def market_trade_batch(symbol,size):
     market_trade = get(endpoint,params,'market')
     return market_trade
     
+# Spot Endpoint
+def get_spot_market_info(symbol):
+    endpoint = "https://api.huobi.pro/market/detail?symbol={}".format(symbol)
+    response = requests.get(endpoint)
+    data = response.json()
+    return data
+
+
+
 
 if __name__ == "__main__":
     #a = contract_price_limit('BTC','this_week')

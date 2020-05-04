@@ -17,6 +17,12 @@ def get_tickers():
     symbol_usd = ["f_usd_"+i for i in all_tickers]
     return [symbol_usdt,symbol_usd]
 
+def get_spot_tickers(symbol):
+    endpoint = "https://www.okex.com/v2/spot/markets/tickers?symbol={}".format(symbol)
+    response = requests.get(endpoint)
+    data = response.json()
+    return data
+    
 
 # fetch ticker info
 def post_ticker_info(symbol):
@@ -42,6 +48,4 @@ def get_swap_tickers(base_token):
 
 if __name__ == "__main__":
     futures = get_tickers()
-    futures_oi = []
-    for f in futures[0]:
-        futures_oi.append(post_ticker_info(f))
+    a = get_spot_tickers("eth_btc")
