@@ -34,8 +34,8 @@ def data_df(exchange,btc_volume,eth_volume):
     dbb = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
     btc_volume_delta = btc_volume - dbb['btc_volume'].tolist()[0]
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
-    btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimal=3))+"%"
-    eth_volume_per = str(np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100,decimal=3))+"%"
+    btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=3))+"%"
+    eth_volume_per = str(np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100,decimals=3))+"%"
     dfb = pd.DataFrame([exchange,btc_volume,btc_volume_delta,btc_volume_per,eth_volume,eth_volume_delta,eth_volume_per])
     dfb = dfb.T
     return dfb
