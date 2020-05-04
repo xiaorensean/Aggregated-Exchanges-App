@@ -10,9 +10,8 @@ from api_coinbase.coinbaseRestApi import get_market_stats
 from api_huobi.HuobiRestApi import get_spot_market_info
 from api_okex.OkexRestApi import get_spot_tickers
 from api_kraken.KrakenRestApi import get_tickers
-
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-
+pd.set_option('display.float_format', lambda x: '%.7f' % x)
 
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
@@ -37,9 +36,14 @@ data_binance = get_spot24(symbol_binance)
 exchange_b = "Binance"
 btc_volume_b = float(data_binance['quoteVolume'])
 eth_volume_b = float(data_binance['volume'])
-db = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
-dfb = pd.DataFrame([exchange_b,btc_volume_b,eth_volume_b])
+dbb = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
+btc_volume_delta = btc_volume_b - dbb['btc_volume'].tolist()[0]
+eth_volume_delta = eth_volume_b - dbb['eth_volume'].tolist()[0]
+btc_volume_per = str((btc_volume_b - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100)+"%"
+eth_volume_per = str((eth_volume_b - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100)+"%"
+dfb = pd.DataFrame([exchange_b,btc_volume_b,btc_volume_delta,btc_volume_per,eth_volume_b,eth_volume_delta,eth_volume_per])
 dfb = dfb.T
+print(dfb)
 #write_log(exchange_b, btc_volume_b, eth_volume_b)
 
 '''
