@@ -31,7 +31,7 @@ def write_log(exchange,btc_volume,eth_volume):
 
 
 def data_df(exchange,btc_volume,eth_volume):
-    dbb = db.query_tables(measurement, ["*","where exchange = 'Binance' and symbol = 'ETHBTC'"])
+    dbb = db.query_tables(measurement, ["*","where exchange = '{}' and symbol = 'ETHBTC'".format(exchange)])
     btc_volume_delta = btc_volume - dbb['btc_volume'].tolist()[0]
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=3))+"%"
