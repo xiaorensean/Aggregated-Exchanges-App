@@ -1,5 +1,8 @@
 import os
 import sys
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import pandas as pd
 import numpy as np
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -31,7 +34,7 @@ def write_log(exchange,btc_volume,eth_volume):
 
 
 def data_df(exchange,btc_volume,eth_volume):
-    dbb = db.query_tables(measurement, ["*","where exchange = '{}' and symbol = 'ETHBTC'".format(exchange)])
+    dbb = db.query_tables(measurement, ["*","where exchange = '{}' and symbol = 'ETHBTC' order by time desc limit 1".format(exchange)])
     btc_volume_delta = btc_volume - dbb['btc_volume'].tolist()[0]
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=3))+"%"
@@ -40,71 +43,86 @@ def data_df(exchange,btc_volume,eth_volume):
     dfb = dfb.T
     return dfb
 
-
+def volume_report():
 # binance
 # quote volume is in BTC
-symbol_binance = "ETHBTC"
-data_binance = get_spot24(symbol_binance)
-exchange_b = "Binance"
-btc_volume_b = float(data_binance['quoteVolume'])
-eth_volume_b = float(data_binance['volume'])
-dfb = data_df(exchange_b,btc_volume_b,eth_volume_b)
-print(dfb)
-#write_log(exchange_b, btc_volume_b, eth_volume_b)
+    symbol_binance = "ETHBTC"
+    data_binance = get_spot24(symbol_binance)
+    exchange_b = "Binance"
+    btc_volume_b = float(data_binance['quoteVolume'])
+    eth_volume_b = float(data_binance['volume'])
+    dfb = data_df(exchange_b,btc_volume_b,eth_volume_b)
+    #write_log(exchange_b, btc_volume_b, eth_volume_b)
 
 
 # coinbase
 #  volume is in base currency units
-symbol_coinbase = "ETH-BTC"
-data_coinbase = get_market_stats(symbol_coinbase)
-exchange_c = "Coinbase"
-eth_volume_c = float(data_coinbase['volume'])
-btc_volume_c = float(data_coinbase['last']) * eth_volume_c
-dfc = data_df(exchange_c,btc_volume_c,eth_volume_c)
-print(dfc)
-#write_log(exchange_c, btc_volume_c, eth_volume_c)
+    symbol_coinbase = "ETH-BTC"
+    data_coinbase = get_market_stats(symbol_coinbase)
+    exchange_c = "Coinbase"
+    eth_volume_c = float(data_coinbase['volume'])
+    btc_volume_c = float(data_coinbase['last']) * eth_volume_c
+    dfc = data_df(exchange_c,btc_volume_c,eth_volume_c)
+    #write_log(exchange_c, btc_volume_c, eth_volume_c)
 
 
 # Huobi
 # volume is in base currency units
-symbol_huobi = "ethbtc"
-data_huobi = get_spot_market_info(symbol_huobi)['tick']
-exchange_h = "Huobi"
-btc_volume_h = float(data_huobi['vol'])
-eth_volume_h = btc_volume_h/float(data_huobi['close'])
-dfh = data_df(exchange_h,btc_volume_h,eth_volume_h)
-print(dfh)
-#write_log(exchange_h, btc_volume_h, eth_volume_h)
+    symbol_huobi = "ethbtc"
+    data_huobi = get_spot_market_info(symbol_huobi)['tick']
+    exchange_h = "Huobi"
+    btc_volume_h = float(data_huobi['vol'])
+    eth_volume_h = btc_volume_h/float(data_huobi['close'])
+    dfh = data_df(exchange_h,btc_volume_h,eth_volume_h)
+    #write_log(exchange_h, btc_volume_h, eth_volume_h)
 
 
 #Okex
 # volume is in eth 
-symbol_okex = "eth_btc"
-data_okex = get_spot_tickers(symbol_okex)['data']
-exchange_o = "Okex"
-btc_volume_o = float(data_okex[0]['coinVolume'])
-eth_volume_o = float(data_okex[0]['volume'])
-dfo = data_df(exchange_o,btc_volume_o,eth_volume_o)
-print(dfo)
-#write_log(exchange_o, btc_volume_o, eth_volume_o)
+    symbol_okex = "eth_btc"
+    data_okex = get_spot_tickers(symbol_okex)['data']
+    exchange_o = "Okex"
+    btc_volume_o = float(data_okex[0]['coinVolume'])
+    eth_volume_o = float(data_okex[0]['volume'])
+    dfo = data_df(exchange_o,btc_volume_o,eth_volume_o)
+    #write_log(exchange_o, btc_volume_o, eth_volume_o)
 
 
 # kraken
 # volume in BTC
-symbol_kraken = "XETHXXBT"
-data_kraken = get_tickers(symbol_kraken)["XETHXXBT"]
-exchange_k = "Kraken"
-btc_volume_k = float(data_kraken['v'][0])
-eth_volume_k = btc_volume_k/float(data_kraken['c'][0])
-dfk = data_df(exchange_k,btc_volume_k,eth_volume_k)
-print(dfk)
-#write_log(exchange_k, btc_volume_k, eth_volume_k)
+    symbol_kraken = "XETHXXBT"
+    data_kraken = get_tickers(symbol_kraken)["XETHXXBT"]
+    exchange_k = "Kraken"
+    btc_volume_k = float(data_kraken['v'][0])
+    eth_volume_k = btc_volume_k/float(data_kraken['c'][0])
+    dfk = data_df(exchange_k,btc_volume_k,eth_volume_k)
+    #write_log(exchange_k, btc_volume_k, eth_volume_k)
 
 
-df = pd.concat([dfb,dfc,dfh,dfo,dfk])
-df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
-print(df)
+    df = pd.concat([dfb,dfc,dfh,dfo,dfk])
+    df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
+    report = df.to_html(index=False)   
+    msg = MIMEMultipart()
+    msg['Subject'] = "ETHBTC Volume Report"
+    msg['From'] = 'xiao@virgilqr.com'
 
+    html = """\
+    <html>
+      <head></head>
+      <body>
+          {}
+      </body>
+    </html>
+          """.format(report)
 
+    part1 = MIMEText(html, 'html')
+    msg.attach(part1)
 
+    smtp = smtplib.SMTP('smtp.gmail.com',587)
+    smtp.starttls()
+    smtp.login("xiao@virgilqr.com","921211Rx")
+    #smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
+    smtp.quit()
 
+volume_report()
