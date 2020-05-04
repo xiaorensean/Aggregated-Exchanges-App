@@ -52,7 +52,7 @@ dfb = data_df(exchange_b,btc_volume_b,eth_volume_b)
 print(dfb)
 #write_log(exchange_b, btc_volume_b, eth_volume_b)
 
-'''
+
 # coinbase
 #  volume is in base currency units
 symbol_coinbase = "ETH-BTC"
@@ -60,9 +60,10 @@ data_coinbase = get_market_stats(symbol_coinbase)
 exchange_c = "Coinbase"
 eth_volume_c = float(data_coinbase['volume'])
 btc_volume_c = float(data_coinbase['last']) * eth_volume_c
+dfc = data_df(exchange_c,btc_volume_c,eth_volume_c)
+print(dfc)
 #write_log(exchange_c, btc_volume_c, eth_volume_c)
-dfb = pd.DataFrame([exchange_b,btc_volume_b,eth_volume_b])
-dfb = dfb.T
+
 
 # Huobi
 # volume is in base currency units
@@ -71,6 +72,8 @@ data_huobi = get_spot_market_info(symbol_huobi)['tick']
 exchange_h = "Huobi"
 btc_volume_h = float(data_huobi['vol'])
 eth_volume_h = btc_volume_h/float(data_huobi['close'])
+dfh = data_df(exchange_h,btc_volume_h,eth_volume_h)
+print(dfh)
 #write_log(exchange_h, btc_volume_h, eth_volume_h)
 
 
@@ -81,6 +84,8 @@ data_okex = get_spot_tickers(symbol_okex)['data']
 exchange_o = "Okex"
 btc_volume_o = float(data_okex[0]['coinVolume'])
 eth_volume_o = float(data_okex[0]['volume'])
+dfo = data_df(exchange_o,btc_volume_o,eth_volume_o)
+print(dfo)
 #write_log(exchange_o, btc_volume_o, eth_volume_o)
 
 
@@ -91,6 +96,8 @@ data_kraken = get_tickers(symbol_kraken)["XETHXXBT"]
 exchange_k = "Kraken"
 btc_volume_k = float(data_kraken['v'][0])
 eth_volume_k = btc_volume_k/float(data_kraken['c'][0])
+dfk = data_df(exchange_k,btc_volume_k,eth_volume_k)
+print(dfc)
 #write_log(exchange_k, btc_volume_k, eth_volume_k)
-'''
+
 
