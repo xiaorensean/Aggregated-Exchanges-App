@@ -203,7 +203,9 @@ class RestClient(object):
 if __name__ == "__main__":
     deribit_api = RestClient()
     #data = deribit_api.getlasttrades('BTC-3APR20-5250-P',100,68969540)
-    instrument = deribit_api.getinstruments()
-    data = deribit_api.getsummary(instrument[0]['instrumentName'])
+    #instrument = deribit_api.getinstruments()
+    #data = deribit_api.getsummary("BTC-PERPETUAL")
+    data = deribit_api.getsummary("BTC-8MAY20-8250-P")
+    #data = deribit_api.getsummary("BTC-26JUN20")
     
 

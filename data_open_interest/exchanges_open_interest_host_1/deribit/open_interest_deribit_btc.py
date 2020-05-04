@@ -28,8 +28,8 @@ def write_open_interest_data(measurement):
         # perpetual swap 
         if "PERPETUAL" in cn:
             summary_data = deribit_api.getsummary(cn)
-            coin_oi = summary_data['openInterest']
-            usd_oi = summary_data['openInterest'] * summary_data['last']
+            usd_oi = summary_data['openInterestAmount']
+            coin_oi = summary_data['openInterestAmount'] / summary_data['last']
         # options 
         elif cn[-2:] == "-C" or cn[-2:] == "-P":
             summary_data = deribit_api.getsummary(cn)
@@ -40,11 +40,11 @@ def write_open_interest_data(measurement):
             if "BTC" in cn:
                 summary_data = deribit_api.getsummary(cn)
                 usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest']/(summary_data['volume']/summary_data['volumeBtc'])
+                coin_oi = summary_data['openInterest']/summary_data['last']
             elif "ETH" in cn:
                 summary_data = deribit_api.getsummary(cn)
                 usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest']/(summary_data['volume']/summary_data['volumeEth'])
+                coin_oi = summary_data['openInterest']/summary_data['last']
             else:
                 pass
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
