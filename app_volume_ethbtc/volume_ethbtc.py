@@ -98,7 +98,7 @@ def volume_report():
     #btc_volume_k = float(data_kraken['v'][0])
     # 24h volume
     eth_volume_k = float(data_kraken['v'][1])
-    btc_volume_k = btc_volume_k*float(data_kraken['c'][0])
+    btc_volume_k = eth_volume_k*float(data_kraken['c'][0])
     dfk = data_df(exchange_k,btc_volume_k,eth_volume_k)
     write_log(exchange_k, btc_volume_k, eth_volume_k)
 
