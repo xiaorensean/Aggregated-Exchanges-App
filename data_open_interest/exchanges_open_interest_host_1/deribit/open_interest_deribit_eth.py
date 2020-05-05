@@ -28,8 +28,8 @@ def write_open_interest_data(measurement):
         # perpetual swap 
         if "PERPETUAL" in cn:
             summary_data = deribit_api.getsummary(cn)
-            coin_oi = summary_data['openInterest']
-            usd_oi = summary_data['openInterest'] / summary_data['last']
+            usd_oi = summary_data['openInterestAmount']
+            coin_oi = summary_data['openInterestAmount'] / summary_data['last']
         # options 
         elif cn[-2:] == "-C" or cn[-2:] == "-P":
             summary_data = deribit_api.getsummary(cn)
