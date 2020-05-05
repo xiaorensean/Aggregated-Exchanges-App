@@ -28,7 +28,7 @@ scripts = [
     "ftx/open_interest_ftx_2.py",
     "huobi/open_interest_huobi_futures.py",
     "huobi/open_interest_huobi_swaps.py",
-    "okex/open_interest_okex_futures.py",
+    #"okex/open_interest_okex_futures.py",
     "okex/open_interest_okex_swaps.py",
 ]
 
