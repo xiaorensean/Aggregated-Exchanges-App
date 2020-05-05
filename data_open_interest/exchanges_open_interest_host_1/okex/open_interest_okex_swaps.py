@@ -65,5 +65,5 @@ def subscribe_swap_ticker(measurement):
 if __name__ == '__main__':
     subscribe_swap_ticker(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         subscribe_swap_ticker(measurement)

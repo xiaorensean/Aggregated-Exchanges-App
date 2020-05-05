@@ -60,7 +60,7 @@ def write_open_interest_data_futures(measurement):
 def subscribe_open_interest_futures(measurement):
     write_open_interest_data_futures(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data_futures(measurement)
 
 

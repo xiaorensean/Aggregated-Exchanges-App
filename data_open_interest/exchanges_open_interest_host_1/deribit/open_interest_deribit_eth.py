@@ -37,16 +37,9 @@ def write_open_interest_data(measurement):
             usd_oi = summary_data['openInterest'] * summary_data['uPx']
         # futures contract
         else:
-            if "BTC" in cn:
-                summary_data = deribit_api.getsummary(cn)
-                usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest'] / summary_data['last']
-            elif "ETH" in cn:
-                summary_data = deribit_api.getsummary(cn)
-                usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest'] / summary_data['last']
-            else:
-                pass
+            summary_data = deribit_api.getsummary(cn)
+            usd_oi = summary_data['openInterestAmount']
+            coin_oi = summary_data['openInterestAmount'] / summary_data['last']
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         if "BTC" in cn:
@@ -66,7 +59,7 @@ def write_open_interest_data(measurement):
 def subscribe_open_interest(measurement):
     write_open_interest_data(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data(measurement)
 
 

@@ -38,6 +38,6 @@ def subscribe_open_interest(measurement):
 if __name__ == '__main__':
     subscribe_open_interest(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         subscribe_open_interest(measurement)
 
