@@ -94,7 +94,10 @@ def volume_report():
     symbol_kraken = "XETHXXBT"
     data_kraken = get_tickers(symbol_kraken)["XETHXXBT"]
     exchange_k = "Kraken"
-    btc_volume_k = float(data_kraken['v'][0])
+    # current volume 
+    #btc_volume_k = float(data_kraken['v'][0])
+    # 24h volume
+    btc_volume_k = float(data_kraken['v'][1])
     eth_volume_k = btc_volume_k/float(data_kraken['c'][0])
     dfk = data_df(exchange_k,btc_volume_k,eth_volume_k)
     write_log(exchange_k, btc_volume_k, eth_volume_k)
@@ -106,7 +109,7 @@ def volume_report():
     
     # gmail part
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "ETHBTC Volume Report"
+    msg['Subject'] = "ETHBTC 24H Volume Report"
     msg['From'] = 'xiao@virgilqr.com'
 
     html = """\
@@ -126,16 +129,16 @@ def volume_report():
     #smtp.set_debuglevel(1)
     smtp.starttls()
     smtp.login("xiao@virgilqr.com","921211Rx")
-    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
     volume_report()
-    while True:
-        time.sleep(60*60)
-        try:
-            volume_report()
-        except: 
-            time.sleep(60*60)
-            pass
+    #while True:
+    #    time.sleep(60*60)
+    #    try:
+    #        volume_report()
+    #    except: 
+    #        time.sleep(60*60)
+    #        pass
