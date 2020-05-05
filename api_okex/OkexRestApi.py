@@ -49,3 +49,5 @@ def get_swap_tickers(base_token):
 if __name__ == "__main__":
     futures = get_tickers()
     a = get_spot_tickers("eth_btc")
+    a1 =  post_ticker_info("f_usd_btc")
+    #a1 = get_swap_tickers("USD")

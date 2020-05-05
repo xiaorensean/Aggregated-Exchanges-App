@@ -96,8 +96,8 @@ def data_collection_usdt(symbols):
         symbol_char = symbol_char.upper()
         symbol_new = symbol_char + "-" + str(contractId)[2:8] 
         # add open interest
-        coin_oi = symb_data['holdAmount']
-        usd_oi = symb_data['holdAmount'] * float(symb_data["buy"])
+        coin_oi = symb_data['holdAmount'] * float(symb_data['unitAmount'])
+        usd_oi = coin_oi * float(symb_data["buy"])
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":symbol_new.split("-")[0]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
