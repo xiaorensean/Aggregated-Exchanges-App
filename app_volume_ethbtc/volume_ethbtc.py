@@ -30,8 +30,8 @@ def write_log(exchange,btc_volume,eth_volume):
     tags = {}
     tags.update({"exchange":exchange})
     tags.update({"symbol":"ETHBTC"})
-    time = False
-    db.write_points_to_measurement(measurement, time, tags, fields)    
+    dbtime = False
+    db.write_points_to_measurement(measurement, dbtime, tags, fields)    
 
 
 def data_df(exchange,btc_volume,eth_volume):
@@ -128,17 +128,17 @@ def volume_report():
     #smtp = smtplib.SMTP_SSL('smtp.gmail.com')
     #smtp.set_debuglevel(1)
     smtp.starttls()
-    smtp.login("xiao@virgilqr.com","921211Rx")
-    #smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.login("xiao@virgilqr.com","921211Rx")
+    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
     smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
     volume_report()
-    #while True:
-    #    time.sleep(60*60)
-    #    try:
-    #        volume_report()
-    #    except: 
-    #        time.sleep(60*60)
-    #        pass
+    while True:
+        time.sleep(60*60)
+        try:
+            volume_report()
+        except: 
+            time.sleep(60*60)
+            pass
