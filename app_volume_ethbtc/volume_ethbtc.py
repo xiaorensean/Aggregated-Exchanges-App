@@ -129,8 +129,8 @@ def volume_report():
     #smtp.set_debuglevel(1)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    #smtp.sendmail("monitor",["vfpa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("monitor",["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
