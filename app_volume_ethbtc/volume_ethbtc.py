@@ -128,8 +128,8 @@ def volume_report():
     #smtp = smtplib.SMTP_SSL('smtp.gmail.com')
     #smtp.set_debuglevel(1)
     smtp.starttls()
-    smtp.login("xiao@virgilqr.com","921211Rx")
-    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.login("vfpa.reports@gmail.com","921211@Rx")
+    smtp.sendmail("monitor",["vfpa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
     #smtp.sendmail("monitor",["xiao@virgilqr.com"], msg.as_string())
     smtp.quit()
 
