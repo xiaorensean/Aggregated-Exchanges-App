@@ -28,7 +28,7 @@ def write_instrument_data(data):
         for key, value in fields.items():
             if type(value) == int:
                 fields[key] = float(value)
-        host_1.write_points_to_measurement(measurement, dbtime, tags, fields) 
+        host_2.write_points_to_measurement(measurement, dbtime, tags, fields) 
     
     
 def subscribe_instrument_symbol(suffix = 'instrument,funding,insurance,settlement,liquidation,trade,chat'):
