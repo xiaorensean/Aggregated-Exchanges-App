@@ -54,19 +54,19 @@ def on_message_symbol(ws, message):
         data = response["data"]
         if len(data) == 1:
             if data[0]['symbol'] == 'XBTUSD':
-                write_instrument_data(data)
+                #write_instrument_data(data)
                 #df = pd.DataFrame(data)
                 #df.to_excel(current_dir+"/data/" + current_time + ".xlsx")
-                #print(data)
+                print(data)
             else:
                 pass
         elif len(data) > 1:
             for d in data:
                 if d['symbol'] == 'XBTUSD':
-                    write_instrument_data(data)
+                    #write_instrument_data(data)
                     #df = pd.DataFrame(data)
                     #df.to_excel(current_dir+"/data/" + current_time + ".xlsx")
-                    #print(data)
+                    print(d)
                 else:
                     pass
         else:
