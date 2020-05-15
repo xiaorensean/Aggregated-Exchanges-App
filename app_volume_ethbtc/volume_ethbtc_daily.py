@@ -136,7 +136,7 @@ def volume_report():
 if __name__ == "__main__":
     volume_report()
     while True:
-        time.sleep(60*60)
+        time.sleep(60*60*24)
         try:
             volume_report()
         except: 
