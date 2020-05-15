@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import multiprocessing
 from utility import resubscribe
 
-process_logger = "logger/deribit_oi_processes.txt"
+process_logger = "logger/ethbtc_volume_report.txt"
 
 processes = []
 
