@@ -19,7 +19,7 @@ def send_error_message(subject,error_message):
     message = 'Subject: {}\n\n{}'.format(subject,body)
     server = smtplib.SMTP_SSL('smtp.gmail.com',465)
     server.login("xiao@virgilqr.com","921211Rx")
-    server.sendmail(msg = message, from_addr="xiao@virgilqr.com", to_addrs=["xiao@virgilqr.com"])
+    server.sendmail(msg = message, from_addr="vpfa.reports@gmail.com", to_addrs=["xiao@virgilqr.com"])
     server.quit()
     
     
@@ -59,8 +59,8 @@ def send_email_dataframe_content(df_test,subject):
 
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
-    smtp.login("xiao@virgilqr.com","921211Rx")
-    smtp.sendmail("monitor",["xiao@virgilqr.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.login("vpfa.reports@gmail.com","921211@Rx")
+    smtp.sendmail("monitor",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
     smtp.quit()
     
     
