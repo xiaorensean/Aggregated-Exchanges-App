@@ -65,7 +65,7 @@ write_data(measurement, data_kr, "kraken")
 vol_total = vol_cb + vol_kr
 data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
 write_data(measurement, data_total, "agg")
-df_coinabse = pd.DataFrame([data_cb,data_delta_cb,data_delta_percentage_cb],index=['volume','volume_change_hourly','volume_change_percentage']).T
+df_coinbase = pd.DataFrame([data_cb,data_delta_cb,data_delta_percentage_cb],index=['volume','volume_change_hourly','volume_change_percentage']).T
 df_kraken = pd.DataFrame([data_kr,data_delta_kr,data_delta_percentage_kr],index=['volume','volume_change_hourly','volume_change_percentage']).T
 print(df_coinbase.to_string())
 print(df_kraken.to_string())
