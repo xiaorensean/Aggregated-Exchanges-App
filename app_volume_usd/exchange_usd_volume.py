@@ -47,7 +47,10 @@ def usd_volume_report():
             write_data(measurement, data_new, "coinbase")
         volume = float(data['volume'])*float(data['last'])
         data_delta_cb.update({t:volume-data_prev})
-        data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+        try:
+            data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+        except:
+            data_delta_percentage_cb.update({t:str(0.00)+"%"})
         vol_cb += volume
         data_cb.update({t:volume})
     write_data(measurement, data_cb, "coinbase")
