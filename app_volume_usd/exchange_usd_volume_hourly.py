@@ -72,7 +72,10 @@ def usd_volume_report():
             write_data(measurement, data_new, "kraken")
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
         data_delta_kr.update({t:volume-data_prev})
-        data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+        try:
+            data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+        except:
+            data_delta_percentage_kr.update({t:str(0.00)+"%"})
         vol_kr += volume
         data_kr.update({t:volume})
     write_data(measurement, data_kr, "kraken")
@@ -126,8 +129,8 @@ def usd_volume_report():
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     
