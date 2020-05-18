@@ -37,6 +37,7 @@ def usd_volume_report():
     data_delta_percentage_cb = {}
     vol_cb = 0 
     for t in ticker_cb:
+        print(t)
         time.sleep(1)
         data = coinbase.get_market_stats(t)
         data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
@@ -114,8 +115,8 @@ def usd_volume_report():
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     
