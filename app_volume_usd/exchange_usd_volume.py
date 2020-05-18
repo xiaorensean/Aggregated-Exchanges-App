@@ -114,8 +114,8 @@ def usd_volume_report():
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     
@@ -123,6 +123,6 @@ def usd_volume_report():
 if __name__ == "__main__":
     usd_volume_report()
     while True:
-        time.sleep(60)
+        time.sleep(60*60)
         usd_volume_report()
     
