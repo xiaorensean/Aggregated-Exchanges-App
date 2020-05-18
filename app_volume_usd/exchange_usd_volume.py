@@ -39,7 +39,7 @@ def usd_volume_report():
     for t in ticker_cb:
         time.sleep(1)
         data = coinbase.get_market_stats(t)
-        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time limit 1".format(t)],"raw")[0]['volume']
+        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time > now() - 1m order by time limit 1".format(t)],"raw")[0]['volume']
         volume = float(data['volume'])*float(data['last'])
         data_delta_cb.update({t:volume-data_prev})
         data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
@@ -57,7 +57,7 @@ def usd_volume_report():
     for t in ticker_kr:
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
-        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' order by time limit 1".format(t)],"raw")[0]['volume']
+        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time > now() - 1m order by time limit 1".format(t)],"raw")[0]['volume']
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
         data_delta_kr.update({t:volume-data_prev})
         data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
@@ -67,9 +67,9 @@ def usd_volume_report():
     # Kraken
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
-    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' order by time limit 1".format(t)],"raw")[0]['volume']
-    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' order by time limit 1".format(t)],"raw")[0]['volume']
-    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' order by time limit 1".format(t)],"raw")[0]['volume']
+    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time > now() - 1m order by time limit 1".format(t)],"raw")[0]['volume']
+    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time > now() - 1m order by time limit 1".format(t)],"raw")[0]['volume']
+    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time > now() - 1m order by time limit 1".format(t)],"raw")[0]['volume']
     write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
     vol_cb_delta = vol_cb - vol_cb_prev
@@ -123,6 +123,6 @@ def usd_volume_report():
 if __name__ == "__main__":
     usd_volume_report()
     while True:
-        time.sleep(60)
+        time.sleep(60*60)
         usd_volume_report()
     
