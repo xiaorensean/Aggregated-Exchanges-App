@@ -139,5 +139,9 @@ if __name__ == "__main__":
     usd_volume_report()
     while True:
         time.sleep(60*60*24)
-        usd_volume_report()
+        try:
+            usd_volume_report()
+        except:
+            time.sleep(60*60)
+            usd_volume_report()
     
