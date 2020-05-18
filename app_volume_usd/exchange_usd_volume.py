@@ -38,7 +38,7 @@ def usd_volume_report():
     vol_cb = 0 
     for t in ticker_cb:
         print(t)
-        time.sleep(1)
+        time.sleep(2)
         data = coinbase.get_market_stats(t)
         try:
             data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
