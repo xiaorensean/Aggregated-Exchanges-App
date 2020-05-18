@@ -43,7 +43,7 @@ def usd_volume_report():
         try:
             data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
         except IndexError:
-            data_new = [{t:float(data['volume'])*float(data['last'])}]
+            data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "coinbase")
         volume = float(data['volume'])*float(data['last'])
         data_delta_cb.update({t:volume-data_prev})
