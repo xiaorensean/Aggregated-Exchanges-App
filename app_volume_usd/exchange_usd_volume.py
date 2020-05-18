@@ -113,9 +113,9 @@ def usd_volume_report():
     msg.attach(part1) 
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
-    #smtp.login("vpfa.reports@gmail.com","921211@Rx")
+    smtp.login("vpfa.reports@gmail.com","921211@Rx")
     smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     
