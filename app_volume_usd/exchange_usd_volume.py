@@ -123,6 +123,6 @@ def usd_volume_report():
 if __name__ == "__main__":
     usd_volume_report()
     while True:
-        time.sleep(60*60)
+        time.sleep(60)
         usd_volume_report()
     
