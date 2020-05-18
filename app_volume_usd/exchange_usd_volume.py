@@ -40,7 +40,11 @@ def usd_volume_report():
         print(t)
         time.sleep(1)
         data = coinbase.get_market_stats(t)
-        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
+        try:
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
+        except IndexError:
+            data_new = [{t:float(data['volume'])*float(data['last'])}]
+            write_data(measurement, data_new, "coinbase")
         volume = float(data['volume'])*float(data['last'])
         data_delta_cb.update({t:volume-data_prev})
         data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
