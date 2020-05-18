@@ -41,7 +41,7 @@ def usd_volume_report():
         time.sleep(2)
         data = coinbase.get_market_stats(t)
         try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
         except IndexError:
             data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "coinbase")
@@ -66,7 +66,7 @@ def usd_volume_report():
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
         try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
         except IndexError:
             data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "kraken")
@@ -82,9 +82,9 @@ def usd_volume_report():
     # Kraken
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
-    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
-    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
-    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
+    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' order by time desc limit 1".format(t)],"raw")[0]['volume']
+    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' order by time desc limit 1".format(t)],"raw")[0]['volume']
+    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' order by time desc limit 1".format(t)],"raw")[0]['volume']
     write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
     vol_cb_delta = vol_cb - vol_cb_prev
