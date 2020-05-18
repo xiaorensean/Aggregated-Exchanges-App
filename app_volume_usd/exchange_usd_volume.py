@@ -64,8 +64,55 @@ write_data(measurement, data_kr, "kraken")
 #%%
 vol_total = vol_cb + vol_kr
 data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
+vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time > now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
+vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time > now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
+vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time > now() - 1h order by time desc limit 1".format(t)],"raw")[0]['volume']
 write_data(measurement, data_total, "agg")
+vol_total_delta = vol_total - vol_total_prev
+vol_cb_delta = vol_cb - vol_cb_prev
+vol_kr_delta = vol_kr - vol_kr_prev
 df_coinbase = pd.DataFrame([data_cb,data_delta_cb,data_delta_percentage_cb],index=['volume','volume_change_hourly','volume_change_percentage']).T
 df_kraken = pd.DataFrame([data_kr,data_delta_kr,data_delta_percentage_kr],index=['volume','volume_change_hourly','volume_change_percentage']).T
-print(df_coinbase.to_string())
-print(df_kraken.to_string())
+cb_report = df_coinbase.to_html()
+kr_report = df_kraken.to_html()
+
+
+# send email with tables
+html_report = report.to_html(index=False)
+msg = MIMEMultipart()
+msg['Subject'] = "24H USD Volume Report Hourly"
+msg['From'] = 'xiao@virgilqr.com'
+
+html = """\
+    <html>
+      <head></head>
+      <body>
+      <h1 style="font-size:15px;"> Total USD Volume Summary: </h1>
+      <p> Total Current 24H USD Volume: {} </p>
+      <p> Total 24H USD Volume Change: {} </p>
+      <h1 style="font-size:15px;"> Coinbase USD Volume Summary: </h1>
+      <p> Coinbase Current 24H USD Volume: {} </p>
+      <p> Coinbase 24H USD Volume Change: {} </p>
+      <h3 style="font-size:15px;"> Tickers Breakdown: </h3>
+      <p>
+           {}
+      </p>
+      <h1 style="font-size:15px;"> Kraken USD Volume Summary: </h1>
+      <p> Kraken Current 24H USD Volume: {} </p>
+      <p> Kraken 24H USD Volume Change: {} </p>
+      <h3 style="font-size:15px;"> TIckers Breakdown: </h3>
+      <p>
+           {}
+      </p>
+      </body>
+    </html>
+          """.format(vol_total,vol_total_delta,vol_cb, vol_cb_delta,cb_report,vol_kr, vol_kr_delta,kr_report,)
+
+part1 = MIMEText(html, 'html')
+msg.attach(part1)
+smtp = smtplib.SMTP('smtp.gmail.com',587)
+smtp.starttls()
+smtp.login("vpfa.reports@gmail.com","921211@Rx")
+    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+smtp.quit()
