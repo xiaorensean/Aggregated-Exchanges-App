@@ -62,7 +62,11 @@ def usd_volume_report():
     for t in ticker_kr:
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
-        data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
+        try:
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' order by time desc limit 1".format(t)],"raw")[0]['volume']
+        except IndexError:
+            data_new = {t:float(data['volume'])*float(data['last'])}
+            write_data(measurement, data_new, "kraken")
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
         data_delta_kr.update({t:volume-data_prev})
         data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
