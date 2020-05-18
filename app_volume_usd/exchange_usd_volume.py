@@ -78,7 +78,6 @@ kr_report = df_kraken.to_html()
 
 
 # send email with tables
-html_report = report.to_html(index=False)
 msg = MIMEMultipart()
 msg['Subject'] = "24H USD Volume Report Hourly"
 msg['From'] = 'xiao@virgilqr.com'
