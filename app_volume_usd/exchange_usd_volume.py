@@ -30,7 +30,7 @@ ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "
 data_cb = {}
 vol_cb = 0 
 for t in ticker_cb:
-    time.sleep(0.1)
+    time.sleep(1)
     data = coinbase.get_market_stats(t)
     volume = float(data['volume'])*float(data['last'])
     vol_cb += volume
