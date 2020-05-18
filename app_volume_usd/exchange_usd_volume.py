@@ -16,6 +16,7 @@ import api_kraken.KrakenRestApi as kraken
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
+host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
 def write_data(measurement,data,exchange_tag):
     for symb in data:
@@ -24,6 +25,8 @@ def write_data(measurement,data,exchange_tag):
         fields.update({"volume":data[symb]})
         tags.update({"symbol":symb})
         tags.update({"exchange":exchange_tag})
+        dbtime = False
+        host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
 ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
