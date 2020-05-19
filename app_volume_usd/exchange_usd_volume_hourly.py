@@ -31,6 +31,7 @@ def write_data(measurement,data,exchange_tag):
 
 
 def usd_volume_report():
+    # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
     data_delta_cb = {}
@@ -56,7 +57,7 @@ def usd_volume_report():
     write_data(measurement, data_cb, "coinbase")
     tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()] 
     
-    # Coinbase
+    # Kraken
     ticker_kr = [i['altname'] for i in tickers_kr if i['quote'] == "ZUSD" and i['altname']!='ETHUSD.d' and i['altname']!='XBTUSD.d' and i['altname']!='GBPUSD' and i['altname'] != 'EURUSD']
     data_kr = {}
     data_delta_kr = {}
@@ -79,7 +80,8 @@ def usd_volume_report():
         vol_kr += volume
         data_kr.update({t:volume})
     write_data(measurement, data_kr, "kraken")
-    # Kraken
+    
+    # Total
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
     try:
@@ -151,6 +153,7 @@ def usd_volume_report():
     
     
 if __name__ == "__main__":
+    time.sleep(60*60)
     usd_volume_report()
     while True:
         time.sleep(60*60)
