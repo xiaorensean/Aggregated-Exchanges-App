@@ -68,7 +68,7 @@ def usd_volume_report():
         try:
             data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
         except IndexError:
-            data_new = {t:float(data['volume'])*float(data['last'])}
+            data_new = {t:float(data[0]['v'][1]) * float(data[0]['c'][0])}
             write_data(measurement, data_new, "kraken")
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
         data_delta_kr.update({t:volume-data_prev})
