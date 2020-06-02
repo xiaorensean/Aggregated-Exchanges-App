@@ -93,15 +93,9 @@ def usd_volume_report():
     # Aggregate
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr}
-    vol_total_prev = host_2.query_tables(measurement, ["*",
-                                                       "where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(
-                                                           t)], "raw")[0]['volume']
-    vol_cb_prev = host_2.query_tables(measurement, ["*",
-                                                    "where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(
-                                                        t)], "raw")[0]['volume']
-    vol_kr_prev = host_2.query_tables(measurement, ["*",
-                                                    "where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(
-                                                        t)], "raw")[0]['volume']
+    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
     vol_cb_delta = vol_cb - vol_cb_prev
@@ -115,7 +109,7 @@ def usd_volume_report():
 
     # send email with tables
     msg = MIMEMultipart()
-    msg['Subject'] = "24H USD Volume Report Houry"
+    msg['Subject'] = "24H USD Volume Report Hourly"
     msg['From'] = 'xiao@virgilqr.com'
 
     html = """\
