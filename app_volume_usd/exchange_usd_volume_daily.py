@@ -38,6 +38,7 @@ def usd_volume_report():
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
+    data_cb_db = {}
     data_delta_cb = {}
     data_delta_percentage_cb = {}
     vol_cb = 0 
@@ -58,12 +59,14 @@ def usd_volume_report():
             data_delta_percentage_cb.update({t:str(0.00)+"%"})
         vol_cb += volume
         data_cb.update({t:value_type_convert(volume)})
-    write_data(measurement, data_cb, "coinbase")
+        data_cb_db.update({t:volume})
+    write_data(measurement, data_cb_db, "coinbase")
     tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()] 
     
     # Kraken
     ticker_kr = [i['altname'] for i in tickers_kr if i['quote'] == "ZUSD" and i['altname']!='ETHUSD.d' and i['altname']!='XBTUSD.d' and i['altname']!='GBPUSD' and i['altname'] != 'EURUSD']
     data_kr = {}
+    data_kr_db = {}
     data_delta_kr = {}
     data_delta_percentage_kr = {}
     vol_kr = 0 
@@ -78,12 +81,13 @@ def usd_volume_report():
         volume = value_type_convert(float(data[0]['v'][1]) * float(data[0]['c'][0]))
         data_delta_kr.update({t:value_type_convert(volume-data_prev)})
         try:
-            data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+            data_delta_percentage_kr.update({t:value_type_convert(volume-data_prev)/data_prev*100))+"%"})
         except:
             data_delta_percentage_kr.update({t:str(0.00)+"%"})
         vol_kr += volume
-        data_kr.update({t:volume})
-    write_data(measurement, data_kr, "kraken")
+        data_kr.update({t:value_type_convert(volume)})
+        data_kr_db.update({t:volume})
+    write_data(measurement, data_kr_db, "kraken")
     # Aggregate
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
