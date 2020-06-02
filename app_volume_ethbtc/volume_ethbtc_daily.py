@@ -40,7 +40,7 @@ def data_df(exchange,btc_volume,eth_volume):
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=2))+"%"
     eth_volume_per = str(np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100,decimals=2))+"%"
-    dfb = pd.DataFrame([exchange,format(btc_volume,","),format(btc_volume_delta,","),btc_volume_per,format(eth_volume,eth_volume_delta,","),format(eth_volume_per,",")])
+    dfb = pd.DataFrame([exchange,format(btc_volume,","),format(btc_volume_delta,","),btc_volume_per,format(eth_volume,","),format(eth_volume_delta,","),format(eth_volume_per,",")])
     dfb = dfb.T
     return dfb
 
