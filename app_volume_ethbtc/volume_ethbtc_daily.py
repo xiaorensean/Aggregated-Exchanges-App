@@ -22,7 +22,7 @@ db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
 
 def value_type_convert(value):
-    v1 = "{:.2f}".format(round(value, 2))
+    v1 = float("{:.2f}".format(round(value, 2)))
     return format(v1,",")
 
 
