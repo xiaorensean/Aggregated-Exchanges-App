@@ -41,7 +41,7 @@ def data_df(exchange,btc_volume,eth_volume):
     btc_volume_per = np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0],decimals=3)
     eth_volume_per = np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] ,decimals=3)
     dfb = pd.DataFrame([btc_volume,btc_volume_delta,btc_volume_per,eth_volume,eth_volume_delta,eth_volume_per]).applymap(lambda i: format(i,","))
-    dfb_new = pd.concat([pd.DataFrame([exchange]),dfb],1)
+    dfb_new = pd.concat([pd.DataFrame([exchange]),dfb],0)
     dfb = dfb.T
     return dfb
 
