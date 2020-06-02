@@ -16,7 +16,7 @@ from api_huobi.HuobiRestApi import get_spot_market_info
 from api_okex.OkexRestApi import get_spot_tickers
 from api_kraken.KrakenRestApi import get_tickers
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-pd.set_option('display.float_format', lambda x: '%.3f' % x)
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
@@ -40,7 +40,8 @@ def data_df(exchange,btc_volume,eth_volume):
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0],decimals=3)
     eth_volume_per = np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] ,decimals=3)
-    dfb = pd.DataFrame([exchange,btc_volume,btc_volume_delta,btc_volume_per,eth_volume,eth_volume_delta,eth_volume_per])
+    dfb = pd.DataFrame([btc_volume,btc_volume_delta,btc_volume_per,eth_volume,eth_volume_delta,eth_volume_per]).applymap(lambda i: format(i,","))
+    dfb_new = pd.concat([pd.DataFrame([exchange]),dfb],1)
     dfb = dfb.T
     return dfb
 
@@ -105,7 +106,7 @@ def volume_report():
 
     df = pd.concat([dfb,dfc,dfh,dfo,dfk])
     df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
-    report = df.applymap(lambda i: format(i,",")).to_html(index=False)
+    report = df.to_html(index=False)
     
     # gmail part
     msg = MIMEMultipart('alternative')
