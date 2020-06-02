@@ -21,6 +21,11 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
 
+def value_type_convert(value):
+    v1 = "{:.2f}".format(round(value, 2))
+    return format(v1,",")
+
+
 
 def write_log(exchange,btc_volume,eth_volume):
     measurement = "log_ethbtc_volume_report"
@@ -40,7 +45,7 @@ def data_df(exchange,btc_volume,eth_volume):
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=2))+"%"
     eth_volume_per = str(np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100,decimals=2))+"%"
-    dfb = pd.DataFrame([exchange,format(btc_volume,","),format(btc_volume_delta,","),btc_volume_per,format(eth_volume,","),format(eth_volume_delta,","),eth_volume_per])
+    dfb = pd.DataFrame([exchange,value_type_convert(btc_volume),value_type_convert(btc_volume_delta),btc_volume_per,value_type_convert(eth_volume),value_type_convert(eth_volume_delta),eth_volume_per])
     dfb = dfb.T
     return dfb
 
