@@ -109,7 +109,7 @@ def volume_report():
 
     df = pd.concat([dfb,dfc,dfh,dfo,dfk])
     df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
-    report = df.applymap(lambda i: format(i,",")).to_html(index=False)
+    report = df.to_html(index=False)
     
     # gmail part
     msg = MIMEMultipart('alternative')
