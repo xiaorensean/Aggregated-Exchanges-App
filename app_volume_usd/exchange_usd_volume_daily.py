@@ -14,10 +14,14 @@ sys.path.append(os.path.dirname(current_dir))
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-pd.set_option('display.float_format', lambda x: '%.3f' % x)
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
+
+def value_type_convert(value):
+    v1 = float("{:.2f}".format(round(value, 2)))
+    return format(v1,",")
 
 def write_data(measurement,data,exchange_tag):
     for symb in data:
@@ -31,6 +35,7 @@ def write_data(measurement,data,exchange_tag):
 
 
 def usd_volume_report():
+    # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
     data_delta_cb = {}
@@ -46,17 +51,17 @@ def usd_volume_report():
             data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "coinbase")
         volume = float(data['volume'])*float(data['last'])
-        data_delta_cb.update({t:volume-data_prev})
+        data_delta_cb.update({t:value_type_convert(volume-data_prev)})
         try:
-            data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+            data_delta_percentage_cb.update({t:value_type_convert((volume-data_prev)/data_prev*100)+"%"})
         except:
             data_delta_percentage_cb.update({t:str(0.00)+"%"})
         vol_cb += volume
-        data_cb.update({t:volume})
+        data_cb.update({t:value_type_convert(volume)})
     write_data(measurement, data_cb, "coinbase")
     tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()] 
     
-    # Coinbase
+    # Kraken
     ticker_kr = [i['altname'] for i in tickers_kr if i['quote'] == "ZUSD" and i['altname']!='ETHUSD.d' and i['altname']!='XBTUSD.d' and i['altname']!='GBPUSD' and i['altname'] != 'EURUSD']
     data_kr = {}
     data_delta_kr = {}
@@ -70,8 +75,8 @@ def usd_volume_report():
         except IndexError:
             data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "kraken")
-        volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
-        data_delta_kr.update({t:volume-data_prev})
+        volume = value_type_convert(float(data[0]['v'][1]) * float(data[0]['c'][0]))
+        data_delta_kr.update({t:value_type_convert(volume-data_prev)})
         try:
             data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
         except:
@@ -79,7 +84,7 @@ def usd_volume_report():
         vol_kr += volume
         data_kr.update({t:volume})
     write_data(measurement, data_kr, "kraken")
-    # Kraken
+    # Aggregate
     vol_total = vol_cb + vol_kr
     data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
     vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1d order by time limit 1".format(t)],"raw")[0]['volume']
@@ -122,15 +127,15 @@ def usd_volume_report():
       </p>
       </body>
     </html>
-          """.format(vol_total,vol_total_delta,vol_cb, vol_cb_delta,cb_report,vol_kr, vol_kr_delta,kr_report,)
+          """.format(value_type_convert(vol_total),value_type_convert(vol_total_delta),value_type_convert(vol_cb), value_type_convert(vol_cb_delta),cb_report,value_type_convert(vol_kr), value_type_convert(vol_kr_delta),kr_report,)
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1) 
     smtp = smtplib.SMTP('smtp.gmail.com',587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     

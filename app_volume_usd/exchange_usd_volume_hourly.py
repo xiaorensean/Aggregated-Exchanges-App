@@ -14,10 +14,14 @@ sys.path.append(os.path.dirname(current_dir))
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-pd.set_option('display.float_format', lambda x: '%.3f' % x)
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
+
+def value_type_convert(value):
+    v1 = float("{:.2f}".format(round(value, 2)))
+    return format(v1,",")
 
 def write_data(measurement,data,exchange_tag):
     for symb in data:
