@@ -38,120 +38,120 @@ def usd_volume_report():
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
+    data_cb_db = {}
     data_delta_cb = {}
     data_delta_percentage_cb = {}
-    vol_cb = 0 
+    vol_cb = 0
     for t in ticker_cb:
         print(t)
         time.sleep(2)
         data = coinbase.get_market_stats(t)
         try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
         except IndexError:
-            data_new = {t:float(data['volume'])*float(data['last'])}
+            data_new = {t: float(data['volume']) * float(data['last'])}
             write_data(measurement, data_new, "coinbase")
-        volume = float(data['volume'])*float(data['last'])
-        data_delta_cb.update({t:volume-data_prev})
+        volume = float(data['volume']) * float(data['last'])
+        data_delta_cb.update({t: value_type_convert(volume - data_prev)})
         try:
-            data_delta_percentage_cb.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+            data_delta_percentage_cb.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
         except:
-            data_delta_percentage_cb.update({t:str(0.00)+"%"})
+            data_delta_percentage_cb.update({t: str(0.00) + "%"})
         vol_cb += volume
-        data_cb.update({t:volume})
-    write_data(measurement, data_cb, "coinbase")
-    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()] 
-    
+        data_cb.update({t: value_type_convert(volume)})
+        data_cb_db.update({t: volume})
+    write_data(measurement, data_cb_db, "coinbase")
+    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()]
+
     # Kraken
-    ticker_kr = [i['altname'] for i in tickers_kr if i['quote'] == "ZUSD" and i['altname']!='ETHUSD.d' and i['altname']!='XBTUSD.d' and i['altname']!='GBPUSD' and i['altname'] != 'EURUSD']
+    ticker_kr = [i['altname'] for i in tickers_kr if
+                 i['quote'] == "ZUSD" and i['altname'] != 'ETHUSD.d' and i['altname'] != 'XBTUSD.d' and i[
+                     'altname'] != 'GBPUSD' and i['altname'] != 'EURUSD']
     data_kr = {}
+    data_kr_db = {}
     data_delta_kr = {}
     data_delta_percentage_kr = {}
-    vol_kr = 0 
+    vol_kr = 0
     for t in ticker_kr:
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
         try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
         except IndexError:
-            data_new = {t:float(data[0]['v'][1]) * float(data[0]['c'][0])}
+            data_new = {t: float(data['volume']) * float(data['last'])}
             write_data(measurement, data_new, "kraken")
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
-        data_delta_kr.update({t:volume-data_prev})
+        data_delta_kr.update({t: value_type_convert(volume - data_prev)})
         try:
-            data_delta_percentage_kr.update({t:str((volume-data_prev)/data_prev*100)+"%"})
+            data_delta_percentage_kr.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
         except:
-            data_delta_percentage_kr.update({t:str(0.00)+"%"})
+            data_delta_percentage_kr.update({t: str(0.00) + "%"})
         vol_kr += volume
-        data_kr.update({t:volume})
-    write_data(measurement, data_kr, "kraken")
-    
-    # Total
+        data_kr.update({t: value_type_convert(volume)})
+        data_kr_db.update({t: volume})
+    write_data(measurement, data_kr_db, "kraken")
+    # Aggregate
     vol_total = vol_cb + vol_kr
-    data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
-    try:
-        vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
-    except: 
-        data_tot = {"vol_total":data_total}
-        write_data(measurement, data_tot, "agg")
-        vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
-    try:
-        vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
-    except:
-        data_cbb = {"vol_cb":vol_cb}
-        write_data(measurement, data_cbb, "agg")
-        vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
-    try:
-        vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
-    except:
-        data_krr = {"vol_kr":vol_kr}
-        write_data(measurement, data_krr, "agg")
-        vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)],"raw")[0]['volume']
+    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr}
+    vol_total_prev = host_2.query_tables(measurement, ["*",
+                                                       "where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(
+                                                           t)], "raw")[0]['volume']
+    vol_cb_prev = host_2.query_tables(measurement, ["*",
+                                                    "where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(
+                                                        t)], "raw")[0]['volume']
+    vol_kr_prev = host_2.query_tables(measurement, ["*",
+                                                    "where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(
+                                                        t)], "raw")[0]['volume']
     write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
     vol_cb_delta = vol_cb - vol_cb_prev
     vol_kr_delta = vol_kr - vol_kr_prev
-    df_coinbase = pd.DataFrame([data_cb,data_delta_cb,data_delta_percentage_cb],index=['volume','volume_change_hourly','volume_change_percentage']).T
-    df_kraken = pd.DataFrame([data_kr,data_delta_kr,data_delta_percentage_kr],index=['volume','volume_change_hourly','volume_change_percentage']).T
+    df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb],
+                               index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
+    df_kraken = pd.DataFrame([data_kr, data_delta_kr, data_delta_percentage_kr],
+                             index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
 
     # send email with tables
     msg = MIMEMultipart()
-    msg['Subject'] = "24H USD Volume Report Hourly"
+    msg['Subject'] = "24H USD Volume Report Houry"
     msg['From'] = 'xiao@virgilqr.com'
 
     html = """\
-    <html>
-      <head></head>
-      <body>
-      <h1 style="font-size:15px;"> Total USD Volume Summary: </h1>
-      <p> Total Current 24H USD Volume: {} </p>
-      <p> Total 24H USD Volume Change: {} </p>
-      <h1 style="font-size:15px;"> Coinbase USD Volume Summary: </h1>
-      <p> Coinbase Current 24H USD Volume: {} </p>
-      <p> Coinbase 24H USD Volume Change: {} </p>
-      <h3 style="font-size:15px;"> Coinbase Tickers Breakdown: </h3>
-      <p>
-           {}
-      </p>
-      <h1 style="font-size:15px;"> Kraken USD Volume Summary: </h1>
-      <p> Kraken Current 24H USD Volume: {} </p>
-      <p> Kraken 24H USD Volume Change: {} </p>
-      <h3 style="font-size:15px;"> Kraken TIckers Breakdown: </h3>
-      <p>
-           {}
-      </p>
-      </body>
-    </html>
-          """.format(vol_total,vol_total_delta,vol_cb, vol_cb_delta,cb_report,vol_kr, vol_kr_delta,kr_report,)
+     <html>
+       <head></head>
+       <body>
+       <h1 style="font-size:15px;"> Total USD Volume Summary: </h1>
+       <p> Total Current 24H USD Volume: {} </p>
+       <p> Total 24H USD Volume Change: {} </p>
+       <h1 style="font-size:15px;"> Coinbase USD Volume Summary: </h1>
+       <p> Coinbase Current 24H USD Volume: {} </p>
+       <p> Coinbase 24H USD Volume Change: {} </p>
+       <h3 style="font-size:15px;"> Coinbase Tickers Breakdown: </h3>
+       <p>
+            {}
+       </p>
+       <h1 style="font-size:15px;"> Kraken USD Volume Summary: </h1>
+       <p> Kraken Current 24H USD Volume: {} </p>
+       <p> Kraken 24H USD Volume Change: {} </p>
+       <h3 style="font-size:15px;"> Kraken TIckers Breakdown: </h3>
+       <p>
+            {}
+       </p>
+       </body>
+     </html>
+           """.format(value_type_convert(vol_total), value_type_convert(vol_total_delta), value_type_convert(vol_cb),
+                      value_type_convert(vol_cb_delta), cb_report, value_type_convert(vol_kr),
+                      value_type_convert(vol_kr_delta), kr_report, )
 
     part1 = MIMEText(html, 'html')
-    msg.attach(part1) 
-    smtp = smtplib.SMTP('smtp.gmail.com',587)
+    msg.attach(part1)
+    smtp = smtplib.SMTP('smtp.gmail.com', 587)
     smtp.starttls()
-    smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.login("vpfa.reports@gmail.com", "921211@Rx")
+    # smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
     
     
