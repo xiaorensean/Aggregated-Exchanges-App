@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 import pandas as pd
 import numpy as np
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 sys.path.append(os.path.dirname(current_dir))
 
 from api_binance.BinanceRestApi import get_spot24
@@ -105,7 +105,7 @@ def volume_report():
 
     df = pd.concat([dfb,dfc,dfh,dfo,dfk])
     df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
-    report = df.to_html(index=False)   
+    report = df.applymap(lambda i: format(i,",")).to_html(index=False)
     
     # gmail part
     msg = MIMEMultipart('alternative')
