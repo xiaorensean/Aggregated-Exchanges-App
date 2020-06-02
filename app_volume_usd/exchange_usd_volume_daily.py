@@ -78,7 +78,7 @@ def usd_volume_report():
         except IndexError:
             data_new = {t:float(data['volume'])*float(data['last'])}
             write_data(measurement, data_new, "kraken")
-        volume = value_type_convert(float(data[0]['v'][1]) * float(data[0]['c'][0]))
+        volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
         data_delta_kr.update({t:value_type_convert(volume-data_prev)})
         try:
             data_delta_percentage_kr.update({t:value_type_convert((volume-data_prev)/data_prev*100)+"%"})
