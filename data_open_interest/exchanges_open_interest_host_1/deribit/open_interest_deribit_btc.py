@@ -48,6 +48,7 @@ def write_open_interest_data(measurement):
             fields.update({"coin_denominated_symbol":"ETH"})
         else:
             pass
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":cn})
         tags.update({"contract_exchange":"Deribit"})

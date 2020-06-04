@@ -28,6 +28,7 @@ def write_open_interest_data(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":get_future(symbol)["underlying"]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":symbol})
         tags.update({"contract_exchange":"FTX"})

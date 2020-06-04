@@ -27,6 +27,7 @@ def write_open_interest_data(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":ai["underlying"]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":ai['symbol']})
         tags.update({"contract_exchange":"Bitmex"})

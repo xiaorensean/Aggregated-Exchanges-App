@@ -28,16 +28,17 @@ def subscribe_open_interest(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":d['symbol'][:3]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":d['symbol']})
         tags.update({"contract_exchange":"Bybit"})
         db_time = False
-        host_2.write_points_to_measurement(measurement,db_time,tags,fields)
+        host_1.write_points_to_measurement(measurement,db_time,tags,fields)
 
 
 if __name__ == '__main__':
     subscribe_open_interest(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         subscribe_open_interest(measurement)
 

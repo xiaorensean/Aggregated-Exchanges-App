@@ -71,6 +71,7 @@ def data_collection_usd(symbols):
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         fields.update({"contract_symbol":symbol_new})
         fields.update({"contract_exchange":"Okex"})
+        fields.update({"is_api_return_timestamp": False})
         usdt_symbol_clean.append(fields)
     return usdt_symbol_clean
 
@@ -96,13 +97,14 @@ def data_collection_usdt(symbols):
         symbol_char = symbol_char.upper()
         symbol_new = symbol_char + "-" + str(contractId)[2:8] 
         # add open interest
-        coin_oi = symb_data['holdAmount']
-        usd_oi = symb_data['holdAmount'] * float(symb_data["buy"])
+        coin_oi = symb_data['holdAmount'] * float(symb_data['unitAmount'])
+        usd_oi = coin_oi * float(symb_data["buy"])
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":symbol_new.split("-")[0]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         fields.update({"contract_symbol":symbol_new})
         fields.update({"contract_exchange":"Okex"})
+        fields.update({"is_api_return_timestamp": False})
         usdt_symbol_clean.append(fields)
     return usdt_symbol_clean
 
@@ -122,12 +124,12 @@ def subscribe_open_interest(measurement):
         tags.update({"contract_symbol":asd["contract_symbol"]})
         tags.update({"contract_exchange":asd["contract_exchange"]})
         db_time = False
-        host_2.write_points_to_measurement(measurement,db_time,tags,fields)
+        host_1.write_points_to_measurement(measurement,db_time,tags,fields)
 
 
 if __name__ == '__main__':
     subscribe_open_interest(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         subscribe_open_interest(measurement)
 

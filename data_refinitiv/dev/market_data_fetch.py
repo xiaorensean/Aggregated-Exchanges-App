@@ -92,7 +92,7 @@ def query_service_discovery(url=None):
 
 
 
-symbol = '/TRI.N'
+symbol = "1YMc1"
 sts_token, refresh_token, expire_time = get_sts_token(None)
 if not sts_token:
     sys.exit(1)
@@ -105,11 +105,11 @@ if not query_service_discovery():
     sys.exit(1)
 
 # Start websocket handshake; create two sessions when the hotstandby parameter is specified.
-session1 = WebSocketMarketPrice('Session 1',hostList[0],symbol,sts_token)
+session1 = WebSocketMarketPrice('Session 1',hostList[0])
 session1.connect()
-'''
+
 if hotstandby:
-    session2 = WebSocketMarketPrice(hostList[1],symbol)
+    session2 = WebSocketMarketPrice('Session 2',hostList[1])
     session2.connect()
 
 try:
@@ -137,4 +137,4 @@ except KeyboardInterrupt:
     session1.disconnect()
     if hotstandby:
         session2.disconnect()
-'''
+

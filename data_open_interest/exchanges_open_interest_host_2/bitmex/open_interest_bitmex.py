@@ -9,6 +9,7 @@ from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 from api_bitmex.BitmexRestApi import get_instrument
 
+
 host_1 = InfluxClientHost1()
 host_2 = InfluxClientHost2()
 
@@ -26,17 +27,18 @@ def write_open_interest_data(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":ai["underlying"]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":ai['symbol']})
         tags.update({"contract_exchange":"Bitmex"})
         dbtime = False
-        host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+        host_1.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
 def subscribe_open_interest(measurement):
     write_open_interest_data(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data(measurement)
 
 

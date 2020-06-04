@@ -34,6 +34,7 @@ def swap_usd_update(swap_data,measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":sd['coinName']})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":sd['contract']})
         tags.update({"contract_exchange":"Okex"})
@@ -48,6 +49,7 @@ def swap_usdt_update(swap_data,measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":sd['coinName']})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":sd['contract']})
         tags.update({"contract_exchange":"Okex"})

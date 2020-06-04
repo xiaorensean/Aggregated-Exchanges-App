@@ -44,6 +44,7 @@ def write_cftc_report(df_dict,host,measurement):
                       dd != "CFTC_Contract_Market_Code" and \
                       dd != "Report_Date_as_MM_DD_YYYY"}
         fields = fields_data_clean(fields_raw)
+        fields.update({"is_api_return_timestamp": True})
         tags = {} 
         tags.update({"CFTC_Contract_Market_Code":data["CFTC_Contract_Market_Code"]})
         dbtime = datetime.datetime.strptime(str(data['Report_Date_as_MM_DD_YYYY']),"%Y-%m-%d %H:%M:%S")

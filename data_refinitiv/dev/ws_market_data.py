@@ -4,6 +4,7 @@ import time
 import json
 import websocket
 import threading
+from auth import get_sts_token
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -11,7 +12,7 @@ sys.path.append(current_dir)
 
 # Global Default Variables
 app_id = '256'
-ric = '/TRI.N'
+ric = "1YMc1"
 #hostname = 'amer-3.pricing.streaming.edp.thomsonreuters.com'
 position = ''
 refresh_token = ''
@@ -21,7 +22,7 @@ service = 'ELEKTRON_DD'
 web_socket_app = None
 web_socket_open = False
 logged_in = False
-original_expire_time = '0'; 
+original_expire_time = '0';
 
 
 class WebSocketMarketPrice:
@@ -32,16 +33,52 @@ class WebSocketMarketPrice:
     host = ''
     disconnected_by_user = False
 
-    def __init__(self, name, host,sts_tk):
+    def __init__(self, name, host):
         self.session_name = name
         self.host = host
-        #self.ric = ric
-        self.sts_token = sts_tk
+
+    def _send_price_trade_request(self, ric_name):
+        """ Create and send simple Market Price request """
+        mp_req_json = {
+            "ID": 2,
+            "Key": {
+                "Name": ric_name
+            },
+        }
+        self.web_socket_app.send(json.dumps(mp_req_json))
+        print("SENT on " + self.session_name + ":")
+        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
 
     def _send_market_price_request(self, ric_name):
         """ Create and send simple Market Price request """
         mp_req_json = {
+            "ID": 2,
+            "Key": {
+                "Name": ric_name
+            },
+            "Domain": "MarketPrice"
+        }
+        self.web_socket_app.send(json.dumps(mp_req_json))
+        print("SENT on " + self.session_name + ":")
+        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
+
+    def _send_symbol_list_request(self, symb_name):
+        mp_req_json = {
             'ID': 2,
+            'Domain': 'SymbolList',
+            'Key': {
+                'Name': symb_name
+            }
+        }
+        self.web_socket_app.send(json.dumps(mp_req_json))
+        print("SENT on " + self.session_name + ":")
+        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
+
+    def _send_trades_request(self, ric_name):
+        mp_req_json = {
+            'ID': 2,
+            'Domain': 'MarketMaker',
+            # 'Type':'Request',
             'Key': {
                 'Name': ric_name,
                 'Service': service
@@ -89,6 +126,8 @@ class WebSocketMarketPrice:
 
         self.logged_in = True
         self._send_market_price_request(ric)
+        # self._send_symbol_list_request(symb_name)
+        # self._send_trades_request(ric)
 
     def _process_message(self, message_json):
         """ Parse at high level and output JSON of message """
@@ -135,7 +174,7 @@ class WebSocketMarketPrice:
 
         print("WebSocket successfully connected for " + self.session_name + "!")
         self.web_socket_open = True
-        self._send_login_request(self.sts_token, False)
+        self._send_login_request(sts_token, False)
 
     # Operations
     def connect(self):
@@ -161,5 +200,4 @@ class WebSocketMarketPrice:
     def refresh_token(self):
         if self.logged_in:
             print("Refreshing the access token for " + self.session_name)
-            self._send_login_request(self.sts_token, True)
-
+            self._send_login_request(sts_token, True)

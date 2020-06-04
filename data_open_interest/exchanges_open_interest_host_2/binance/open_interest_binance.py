@@ -6,9 +6,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 dm_dir = os.path.dirname(current_dir)
 pkg_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(pkg_dir)
+from api_binance.BinanceRestApi import get_open_interest,get_futures_tickers
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
-from api_binance.BinanceRestApi import get_open_interest,get_futures_tickers
+
 
 host_1 = InfluxClientHost1()
 host_2 = InfluxClientHost2()
@@ -27,17 +28,18 @@ def write_open_interest_data(symbol,rate,measurement):
     fields.update({"coin_denominated_open_interest":float(coin_oi)})
     fields.update({"coin_denominated_symbol":symbol[:-4]})
     fields.update({"usd_denominated_open_interest":float(usd_oi)})
+    fields.update({"is_api_return_timestamp": False})
     tags = {}
     tags.update({"contract_symbol":symbol})
     tags.update({"contract_exchange":"Binance"})
     dbtime = False
-    host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+    host_1.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
 def subscribe_open_interest(symbol,rate,measurement):
     write_open_interest_data(symbol,rate,measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data(symbol,rate,measurement)
 
 

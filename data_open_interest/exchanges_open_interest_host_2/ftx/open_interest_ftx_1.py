@@ -1,4 +1,3 @@
-import multiprocessing as mp
 import time
 import os
 import sys 
@@ -29,17 +28,18 @@ def write_open_interest_data(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":get_future(symbol)["underlying"]})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":symbol})
         tags.update({"contract_exchange":"FTX"})
         dbtime = False
-        host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+        host_1.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
 def subscribe_open_interest(measurement):
     write_open_interest_data(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data(measurement)
 
 

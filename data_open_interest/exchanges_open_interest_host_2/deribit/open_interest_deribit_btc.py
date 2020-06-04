@@ -28,8 +28,8 @@ def write_open_interest_data(measurement):
         # perpetual swap 
         if "PERPETUAL" in cn:
             summary_data = deribit_api.getsummary(cn)
-            coin_oi = summary_data['openInterest']
-            usd_oi = summary_data['openInterest'] * summary_data['last']
+            usd_oi = summary_data['openInterestAmount']
+            coin_oi = summary_data['openInterestAmount'] / summary_data['last']
         # options 
         elif cn[-2:] == "-C" or cn[-2:] == "-P":
             summary_data = deribit_api.getsummary(cn)
@@ -37,16 +37,9 @@ def write_open_interest_data(measurement):
             usd_oi = summary_data['openInterest'] * summary_data['uPx']
         # futures contract
         else:
-            if "BTC" in cn:
-                summary_data = deribit_api.getsummary(cn)
-                usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest']/(summary_data['volume']/summary_data['volumeBtc'])
-            elif "ETH" in cn:
-                summary_data = deribit_api.getsummary(cn)
-                usd_oi = summary_data['openInterestAmount']
-                coin_oi = summary_data['openInterest']/(summary_data['volume']/summary_data['volumeEth'])
-            else:
-                pass
+            summary_data = deribit_api.getsummary(cn)
+            usd_oi = summary_data['openInterestAmount']
+            coin_oi = summary_data['openInterestAmount']/summary_data['last']
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         if "BTC" in cn:
@@ -55,18 +48,19 @@ def write_open_interest_data(measurement):
             fields.update({"coin_denominated_symbol":"ETH"})
         else:
             pass
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":cn})
         tags.update({"contract_exchange":"Deribit"})
         dbtime = False
-        host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+        host_1.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 
 
 def subscribe_open_interest(measurement):
     write_open_interest_data(measurement)
     while True:
-        time.sleep(60)
+        time.sleep(55)
         write_open_interest_data(measurement)
 
 

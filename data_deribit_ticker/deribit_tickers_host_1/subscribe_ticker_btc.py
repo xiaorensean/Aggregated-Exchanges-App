@@ -1,4 +1,5 @@
 import traceback
+import datetime
 import time
 import os 
 import sys 
@@ -45,7 +46,6 @@ def write_ticker_data(measurement,d):
         fields.update({"bidPrice":float(d["bidPrice"])})
     except:
         fields.update({"bidPrice":None})
-    fields.update({"timestamp":d["created"]})
     try:
         fields.update({"high":float(d["high"])})
     except:
@@ -90,9 +90,14 @@ def write_ticker_data(measurement,d):
         fields.update({"volume_btc":float(d["volumeBtc"])})
     except:
         fields.update({"volume_btc":None})
+    fields.update({"is_api_return_timestamp": True})
     tags = {}
     tags.update({"instrument_name":d["instrumentName"]})
-    dbtime = False
+    ts = " ".join(d['created'].split(" ")[:2])
+    dt_temp = datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+    uts = time.mktime(dt_temp.timetuple()) * 1000
+    dt = datetime.datetime.utcfromtimestamp(uts / 1000)
+    dbtime = dt
     db.write_points_to_measurement(measurement, dbtime, tags, fields)
 
 

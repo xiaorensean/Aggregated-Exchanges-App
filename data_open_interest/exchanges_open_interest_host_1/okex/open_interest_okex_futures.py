@@ -71,6 +71,7 @@ def data_collection_usd(symbols):
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         fields.update({"contract_symbol":symbol_new})
         fields.update({"contract_exchange":"Okex"})
+        fields.update({"is_api_return_timestamp": False})
         usdt_symbol_clean.append(fields)
     return usdt_symbol_clean
 
@@ -103,6 +104,7 @@ def data_collection_usdt(symbols):
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
         fields.update({"contract_symbol":symbol_new})
         fields.update({"contract_exchange":"Okex"})
+        fields.update({"is_api_return_timestamp": False})
         usdt_symbol_clean.append(fields)
     return usdt_symbol_clean
 

@@ -28,6 +28,7 @@ def write_open_interest_data_swap(measurement):
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":coin_symbol})
         fields.update({"usd_denominated_open_interest":float(usd_oi)})
+        fields.update({"is_api_return_timestamp": False})
         tags = {}
         tags.update({"contract_symbol":symb})
         tags.update({"contract_exchange":"Huobi"})
