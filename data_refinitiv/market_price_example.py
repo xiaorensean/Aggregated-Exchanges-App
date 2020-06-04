@@ -1,6 +1,5 @@
 import sys
 import time
-import getopt
 import requests
 import socket
 import json
@@ -22,7 +21,7 @@ client_secret = ''
 scope = 'trapi'
 region = 'amer'
 #ric = "TYc1"
-ric = "1YMc1"
+#ric = "1YMc1"
 #ric = "USc1"
 #ric = "FVc1"
 #ric = "TUc1"
@@ -44,11 +43,12 @@ class WebSocketSession:
     host = ''
     disconnected_by_user = False
 
-    def __init__(self, name, host):
+    def __init__(self, name, host, symbol):
         self.session_name = name
         self.host = host
+        self.ric = symbol
 
-    def _send_price_trade_request(self, ric_name):
+    def _send_data_request(self, ric_name):
         """ Create and send simple Market Price request """
         mp_req_json = {
                       "ID":2,
@@ -61,45 +61,7 @@ class WebSocketSession:
         print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
 
 
-    def _send_market_price_request(self, ric_name):
-        """ Create and send simple Market Price request """
-        mp_req_json = {
-                      "ID":2,
-                    "Key":{
-                       "Name":ric_name
-                         },
-                    "Domain":"MarketPrice"
-                    }
-        self.web_socket_app.send(json.dumps(mp_req_json))
-        print("SENT on " + self.session_name + ":")
-        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
 
-    def _send_symbol_list_request(self,symb_name):
-        mp_req_json = {
-                   'ID': 2,
-                   'Domain': 'SymbolList',
-                   'Key': {
-                            'Name': symb_name
-                          }
-                       }
-        self.web_socket_app.send(json.dumps(mp_req_json))
-        print("SENT on " + self.session_name + ":")
-        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
-    
-    def _send_trades_request(self,ric_name):
-        mp_req_json = {
-            'ID': 2,
-            'Domain':'MarketMaker',
-            #'Type':'Request',
-            'Key': {
-                'Name': ric_name,
-                'Service': service
-            },
-        }
-        self.web_socket_app.send(json.dumps(mp_req_json))
-        print("SENT on " + self.session_name + ":")
-        print(json.dumps(mp_req_json, sort_keys=True, indent=2, separators=(',', ':')))
-    
     def _send_login_request(self, auth_token, is_refresh_token):
         """
             Send login request with authentication token.
@@ -130,6 +92,7 @@ class WebSocketSession:
         print("SENT on " + self.session_name + ":")
         print(json.dumps(login_json, sort_keys=True, indent=2, separators=(',', ':')))
 
+
     def _process_login_response(self, message_json):
         """ Send item request """
         if message_json['State']['Stream'] != "Open" or message_json['State']['Data'] != "Ok":
@@ -137,10 +100,9 @@ class WebSocketSession:
             sys.exit(1)
 
         self.logged_in = True
-        self._send_market_price_request(ric)
-        #self._send_symbol_list_request(symb_name)
-        #self._send_trades_request(ric)
-    
+        self._send_data_request(self.ric)
+
+
     def _process_message(self, message_json):
         """ Parse at high level and output JSON of message """
         message_type = message_json['Type']
@@ -370,6 +332,7 @@ def get_sts_token(current_refresh_token, url=None):
 
 
 if __name__ == "__main__":
+    ric = "TYc1"
     if position == '':
         # Populate position if possible
         try:
@@ -390,11 +353,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Start websocket handshake; create two sessions when the hotstandby parameter is specified.
-    session1 = WebSocketSession("session1", hostList[0])
+    session1 = WebSocketSession("session1", hostList[0], ric)
     session1.connect()
 
     if hotstandby:
-        session2 = WebSocketSession("session2", hostList[1])
+        session2 = WebSocketSession("session2", hostList[1],ric)
         session2.connect()
 
     try:

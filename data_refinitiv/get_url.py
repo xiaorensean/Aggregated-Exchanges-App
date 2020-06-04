@@ -1,23 +1,16 @@
 import os
 import sys
-import time
-import socket
 import requests
 import json
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
-from auth import get_sts_token
-from ws_market_data import WebSocketMarketPrice
 
-# Global varibles
-hotstandby = False
-session2 = None
-region = "amer"
-hostList = []
-original_expire_time = '0'; 
 
-def query_service_discovery(url=None):
+
+
+def query_service_discovery(sts_token, region = "amer", hotstandby = False, url=None):
+    hostList = []
     discovery_url = 'https://api.refinitiv.com/streaming/pricing/v1/'
     if url is None:
         url = discovery_url
@@ -68,7 +61,7 @@ def query_service_discovery(url=None):
                 print("No host found from EDP service discovery")
                 sys.exit(1)
 
-        return True
+        return [True, hostList]
 
     elif r.status_code == 301 or r.status_code == 302 or r.status_code == 303 or r.status_code == 307 or r.status_code == 308:
         # Perform URL redirect
@@ -88,53 +81,4 @@ def query_service_discovery(url=None):
         print('EDP-GW service discovery HTTP code:', r.status_code, r.reason)
         print('Retry the service discovery request')
         return query_service_discovery()
-
-
-
-
-symbol = "1YMc1"
-sts_token, refresh_token, expire_time = get_sts_token(None)
-if not sts_token:
-    sys.exit(1)
-
-original_expire_time = expire_time
-
-# Query VIPs from EDP service discovery
-if not query_service_discovery():
-    print("Failed to retrieve endpoints from EDP Service Discovery. Exiting...")
-    sys.exit(1)
-
-# Start websocket handshake; create two sessions when the hotstandby parameter is specified.
-session1 = WebSocketMarketPrice('Session 1',hostList[0])
-session1.connect()
-
-if hotstandby:
-    session2 = WebSocketMarketPrice('Session 2',hostList[1])
-    session2.connect()
-
-try:
-    while True:
-        #  Continue using current token until 90% of initial time before it expires.
-        time.sleep(int(float(expire_time) * 0.90))
-
-        sts_token, refresh_token, expire_time = get_sts_token(refresh_token)
-        if not sts_token:
-            sys.exit(1)
-            
-        if int(expire_time) != int(original_expire_time):
-            print('expire time changed from ' + str(original_expire_time) + ' sec to ' + str(expire_time) + ' sec; retry with password')
-            sts_token, refresh_token, expire_time = get_sts_token(None)
-            if not sts_token:
-                sys.exit(1) 
-            original_expire_time = expire_time
-
-        # Update token.
-        session1.refresh_token()
-        if hotstandby:
-            session2.refresh_token()
-
-except KeyboardInterrupt:
-    session1.disconnect()
-    if hotstandby:
-        session2.disconnect()
 

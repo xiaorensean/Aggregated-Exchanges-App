@@ -92,3 +92,4 @@ def get_sts_token(current_refresh_token, url=None):
 
 if __name__ == "__main__":
     a = get_sts_token(None)
+    print(a)
