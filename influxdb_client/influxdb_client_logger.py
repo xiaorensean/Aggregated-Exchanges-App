@@ -130,7 +130,7 @@ if __name__ == '__main__':
     db_names = db.client.get_list_database()
     tables = db.get_table_name()
     #a = db.get_tag_values('exchange_open_interest','')
-    a = db.query_tables('errorlog',['*',"where dbhost ='host1' and table_name = 'bybit_tickers' order by time desc limit 10000;"])
+    a = db.query_tables('errorlog',['*',"where dbhost ='host1' and time > now() - 10m order by time desc"])
     #a1 = a[a.tag == "BTC-8MAY20-5500-C"]
     #print(a.shape)
     #print(a.to_string())

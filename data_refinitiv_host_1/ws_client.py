@@ -95,6 +95,11 @@ class WebSocketMarketPrice:
     def _write_quote_data(self,data):
         measurement = "refinitiv_quote_" + self.ric
         fields = data
+        # write everything as float
+        for key, value in fields.items():
+            if type(value) == int:
+                fields[key] = float(value)
+        fields.update({"is_api_return_timestamp": True})
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
@@ -103,6 +108,11 @@ class WebSocketMarketPrice:
     def _write_trades_data(self,data):
         measurement = "refinitiv_trades_" + self.ric
         fields = data
+        # write everything as float
+        for key, value in fields.items():
+            if type(value) == int:
+                fields[key] = float(value)
+        fields.update({"is_api_return_timestamp": True})
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
@@ -112,6 +122,11 @@ class WebSocketMarketPrice:
         measurement_temp = "refinitiv_" + dt + "_" + self.ric
         measurement = measurement_temp.lower()
         fields = data
+        # write everything as float
+        for key, value in fields.items():
+            if type(value) == int:
+                fields[key] = float(value)
+        fields.update({"is_api_return_timestamp": True})
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
