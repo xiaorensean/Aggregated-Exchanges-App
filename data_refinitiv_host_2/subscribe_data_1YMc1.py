@@ -141,7 +141,7 @@ class WebSocketSession:
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
-        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
+        host_2.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     # Callback events from WebSocketApp
     def _on_message(self, message):
@@ -371,7 +371,7 @@ def get_sts_token(current_refresh_token, url=None):
 
 
 if __name__ == "__main__":
-    ric = "TYc1"
+    ric = "1YMc1"
     if position == '':
         # Populate position if possible
         try:

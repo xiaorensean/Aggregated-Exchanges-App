@@ -70,7 +70,7 @@ def fetch_market_data(symbol):
 
 
 if __name__ == "__main__":
-    symbol = "1YMc1"
+    symbol = "BTC=BTSP"
     #symbol = "BTC=BTSP"
     #symbol = "BTC="
     fetch_market_data(symbol)

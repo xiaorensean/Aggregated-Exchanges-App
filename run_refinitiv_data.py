@@ -11,28 +11,28 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import multiprocessing
 from utility import resubscribe
 
-process_logger = "logger/refinitiv_data1.txt"
+process_logger = "logger/refinitiv_data2.txt"
 
 processes = []
 
 scripts = [
-    "data_refinitiv_host_1/subscribe_data_1YMc1.py",
-    "data_refinitiv_host_1/subscribe_data_CLc1.py",
-    "data_refinitiv_host_1/subscribe_data_ESc1.py",
-    "data_refinitiv_host_1/subscribe_data_FVc1.py",
-	"data_refinitiv_host_1/subscribe_data_GCc1.py",
-	"data_refinitiv_host_1/subscribe_data_HOc1.py",
-	"data_refinitiv_host_1/subscribe_data_NGc1.py",
-	"data_refinitiv_host_1/subscribe_data_NQc1.py",
-	"data_refinitiv_host_1/subscribe_data_TUc1.py",
-	"data_refinitiv_host_1/subscribe_data_TYc1.py",
-	"data_refinitiv_host_1/subscribe_data_USc1.py",
-	"data_refinitiv_host_1/subscribe_data_BTCc1.py",
-	"data_refinitiv_host_1/subscribe_data_BTC_BTSP.py",
-    "data_refinitiv_host_1/subscribe_data_BCH_BTSP.py",
-	"data_refinitiv_host_1/subscribe_data_ETH_BTSP.py",
-	"data_refinitiv_host_1/subscribe_data_LTC_BTSP.py",
-	"data_refinitiv_host_1/subscribe_data_XRP_BTSP.py"
+    "data_refinitiv_host_2/subscribe_data_1YMc1.py",
+    "data_refinitiv_host_2/subscribe_data_CLc1.py",
+    "data_refinitiv_host_2/subscribe_data_ESc1.py",
+    "data_refinitiv_host_2/subscribe_data_FVc1.py",
+	"data_refinitiv_host_2/subscribe_data_GCc1.py",
+	"data_refinitiv_host_2/subscribe_data_HOc1.py",
+	"data_refinitiv_host_2/subscribe_data_NGc1.py",
+	"data_refinitiv_host_2/subscribe_data_NQc1.py",
+	"data_refinitiv_host_2/subscribe_data_TUc1.py",
+	"data_refinitiv_host_2/subscribe_data_TYc1.py",
+	"data_refinitiv_host_2/subscribe_data_USc1.py",
+	"data_refinitiv_host_2/subscribe_data_BTCc1.py",
+	"data_refinitiv_host_2/subscribe_data_BTC_BTSP.py",
+    "data_refinitiv_host_2/subscribe_data_BCH_BTSP.py",
+	"data_refinitiv_host_2/subscribe_data_ETH_BTSP.py",
+	"data_refinitiv_host_2/subscribe_data_LTC_BTSP.py",
+	"data_refinitiv_host_2/subscribe_data_XRP_BTSP.py"
 ]
 
 def create_process(directory, scriptname):

@@ -109,7 +109,7 @@ class WebSocketMarketPrice:
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
-        host_2.write_points_to_measurement(measurement,dbtime,tags,fields)
+        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     def _process_message(self, message_json):
         """ Parse at high level and output JSON of message """
@@ -134,7 +134,7 @@ class WebSocketMarketPrice:
         data = json.dumps(message_json, sort_keys=True, indent=2, separators=(',', ':'))
 
         for singleMsg in message_json:
-            #print(singleMsg)
+            print(singleMsg)
             try:
                 #print(singleMsg['UpdateType'], singleMsg['Fields'])
                 data = singleMsg['Fields']

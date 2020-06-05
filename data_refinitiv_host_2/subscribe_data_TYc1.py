@@ -141,7 +141,7 @@ class WebSocketSession:
         dbtime = False
         tags = {}
         tags.update({"symbol":self.ric})
-        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
+        host_2.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     # Callback events from WebSocketApp
     def _on_message(self, message):
