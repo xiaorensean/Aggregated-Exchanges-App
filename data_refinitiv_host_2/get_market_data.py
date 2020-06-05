@@ -35,11 +35,11 @@ def fetch_market_data(symbol):
     hostList = resp[1]
 
     # Start websocket handshake; create two sessions when the hotstandby parameter is specified.
-    session1 = WebSocketMarketPrice('Session 1',hostList[0], sts_token, position, symbol)
+    session1 = WebSocketMarketPrice(hostList[0], sts_token, position, symbol)
     session1.connect()
 
     if hotstandby:
-        session2 = WebSocketMarketPrice('Session 2',hostList[1], sts_token, position, symbol)
+        session2 = WebSocketMarketPrice(hostList[1], sts_token, position, symbol)
         session2.connect()
 
     try:

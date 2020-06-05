@@ -35,8 +35,8 @@ class WebSocketMarketPrice:
     host = ''
     disconnected_by_user = False
 
-    def __init__(self, name, host, sts_token, position, symbol):
-        self.session_name = name
+    def __init__(self, host, sts_token, position, symbol):
+        self.session_name = symbol
         self.host = host
         self.position = position
         self.sts_token = sts_token
