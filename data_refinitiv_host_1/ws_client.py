@@ -93,7 +93,10 @@ class WebSocketMarketPrice:
         self.logged_in = True
         self._send_data_request(self.ric)
     def _write_quote_data(self,data):
-        measurement = "refinitiv_quote_" + self.ric
+        ticker = self.ric
+        if "=" in ticker:
+            ticker_new = ticker.replace("=","_")
+        measurement = "refinitiv_quote_" + ticker_new
         fields = data
         # write everything as float
         for key, value in fields.items():
@@ -106,7 +109,10 @@ class WebSocketMarketPrice:
         host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     def _write_trades_data(self,data):
-        measurement = "refinitiv_trades_" + self.ric
+        ticker = self.ric
+        if "=" in ticker:
+            ticker_new = ticker.replace("=", "_")
+        measurement = "refinitiv_trades_" + ticker_new
         fields = data
         # write everything as float
         for key, value in fields.items():
@@ -119,8 +125,10 @@ class WebSocketMarketPrice:
         host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     def _write_other_data(self,data, dt):
-        measurement_temp = "refinitiv_" + dt + "_" + self.ric
-        measurement = measurement_temp.lower()
+        ticker = self.ric
+        if "=" in ticker:
+            ticker_new = ticker.replace("=", "_")
+        measurement = "refinitiv_" + dt + "_" + ticker_new
         fields = data
         # write everything as float
         for key, value in fields.items():
@@ -157,7 +165,7 @@ class WebSocketMarketPrice:
         for singleMsg in message_json:
             #print(singleMsg)
             try:
-                print(singleMsg['UpdateType'], singleMsg['Fields'])
+                #print(singleMsg['UpdateType'], singleMsg['Fields'])
                 if singleMsg['UpdateType'] == 'Quote':
                     quote = singleMsg['Fields']
                     try:
