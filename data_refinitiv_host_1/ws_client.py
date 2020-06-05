@@ -92,42 +92,11 @@ class WebSocketMarketPrice:
 
         self.logged_in = True
         self._send_data_request(self.ric)
-    def _write_quote_data(self,data):
+
+    def _write_quote_data(self,data, dt):
         ticker = self.ric
         if "=" in ticker:
             ticker_new = ticker.replace("=","_")
-        measurement = "refinitiv_quote_" + ticker_new
-        fields = data
-        # write everything as float
-        for key, value in fields.items():
-            if type(value) == int:
-                fields[key] = float(value)
-        fields.update({"is_api_return_timestamp": True})
-        dbtime = False
-        tags = {}
-        tags.update({"symbol":self.ric})
-        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
-
-    def _write_trades_data(self,data):
-        ticker = self.ric
-        if "=" in ticker:
-            ticker_new = ticker.replace("=", "_")
-        measurement = "refinitiv_trades_" + ticker_new
-        fields = data
-        # write everything as float
-        for key, value in fields.items():
-            if type(value) == int:
-                fields[key] = float(value)
-        fields.update({"is_api_return_timestamp": True})
-        dbtime = False
-        tags = {}
-        tags.update({"symbol":self.ric})
-        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
-
-    def _write_other_data(self,data, dt):
-        ticker = self.ric
-        if "=" in ticker:
-            ticker_new = ticker.replace("=", "_")
         measurement = "refinitiv_" + dt + "_" + ticker_new
         fields = data
         # write everything as float
@@ -166,36 +135,15 @@ class WebSocketMarketPrice:
             #print(singleMsg)
             try:
                 #print(singleMsg['UpdateType'], singleMsg['Fields'])
-                if singleMsg['UpdateType'] == 'Quote':
-                    quote = singleMsg['Fields']
-                    try:
-                        self._write_quote_data(quote)
-                    except:
-                        error = traceback.format_exc()
-                        print(error)
-                        measurement = "refinitiv_trades_" + self.ric
-                        logger(measurement, error, self.ric)
-
-                elif singleMsg['UpdateType'] == 'Trade':
-                    trades = singleMsg['Fields']
-                    try:
-                        self._write_trades_data(trades)
-                    except:
-                        error = traceback.format_exc()
-                        print(error)
-                        measurement = "refinitiv_quote_" + self.ric
-                        logger(measurement, error, self.ric)
-                else:
-                    data = singleMsg['Fields']
-                    data_type = singleMsg['UpdateType']
-                    try:
-                        self._write_trades_data(data,data_type)
-                    except:
-                        error = traceback.format_exc()
-                        print(error)
-                        measurement = "refinitiv_data_" + self.ric
-                        logger(measurement, error, self.ric)
-
+                data = singleMsg['Fields']
+                data_type = singleMsg['UpdateType']
+                try:
+                    self._write_trades_data(data, data_type)
+                except:
+                    error = traceback.format_exc()
+                    print(error)
+                    measurement = "refinitiv_" + data_type + "_" + self.ric
+                    logger(measurement, error, self.ric)
             except:
                 pass
             self._process_message(singleMsg)
