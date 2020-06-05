@@ -93,7 +93,7 @@ class WebSocketMarketPrice:
         self.logged_in = True
         self._send_data_request(self.ric)
 
-    def _write_quote_data(self,data, dt):
+    def _write_market_data(self,data, dt):
         ticker = self.ric
         if "=" in ticker:
             ticker_new = ticker.replace("=","_")
@@ -138,7 +138,7 @@ class WebSocketMarketPrice:
                 data = singleMsg['Fields']
                 data_type = singleMsg['UpdateType']
                 try:
-                    self._write_trades_data(data, data_type)
+                    self._write_market_data(data, data_type)
                 except:
                     error = traceback.format_exc()
                     print(error)
