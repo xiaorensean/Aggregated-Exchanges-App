@@ -13,7 +13,7 @@ from get_url import query_service_discovery
 original_expire_time = '0'
 hotstandby = False
 
-def get_market_data(symbol):
+def fetch_market_data(symbol):
     session2 = None
     position = ''
     if position == '':
@@ -67,6 +67,15 @@ def get_market_data(symbol):
         session1.disconnect()
         if hotstandby:
             session2.disconnect()
+
+
 if __name__ == "__main__":
     symbol = "1YMc1"
-    get_market_data(symbol)
+    #symbol = "BTC=BTSP"
+    #symbol = "BTC="
+    fetch_market_data(symbol)
+
+# 1YMc1
+# {'PRC_QL_CD': 'OPN', 'BID_TIM_MS': 5013740, 'QUOTIM_MS': 5013740, 'BIDSIZE': 4, 'BID': 26271, 'BID_TIME1': '01:23:33', 'BID_COND_N': '0', 'NO_BIDORD1': 4, 'SPARE_TS1': '01:23:33', 'MKT_ST_IND': 'BBO', 'SEQNUM': 34320207, 'SEQNUM_QT': 34320207, 'ASK': 26273, 'ASKSIZE': 3, 'ASK_TIME1': '01:23:33', 'ASK_TIM_MS': 5013739, 'ASK_COND_N': '1', 'NO_ASKORD1': 3}
+# BTC=BTSP
+# {'TRDPRC_1': 9810.26, 'TRADE_DATE': '2020-06-05', 'SALTIM': '01:25:03', 'TRADE_ID': '115053442', 'VOL_DEC': 3.50187712, 'NUM_MOVES': 652, 'NETCHNG_1': 18.34, 'PCTCHNG': 0.19, 'AC

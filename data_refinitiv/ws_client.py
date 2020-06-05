@@ -1,3 +1,4 @@
+import traceback
 import sys
 import os
 import time
@@ -7,7 +8,9 @@ import threading
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
-
+from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
+from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
+from utility.error_logger_writer import logger
 
 # Global Default Variables
 app_id = '256'
@@ -19,6 +22,8 @@ service = 'ELEKTRON_DD'
 web_socket_app = None
 web_socket_open = False
 logged_in = False
+host_1 = InfluxClientHost1()
+host_2 = InfluxClientHost2()
 
 
 class WebSocketMarketPrice:
@@ -86,6 +91,30 @@ class WebSocketMarketPrice:
 
         self.logged_in = True
         self._send_data_request(self.ric)
+    def _write_quote_data(self,data):
+        measurement = "refinitiv_quote_" + self.ric
+        fields = data
+        dbtime = False
+        tags = {}
+        tags.update({"symbol":self.ric})
+        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
+
+    def _write_trades_data(self,data):
+        measurement = "refinitiv_trades_" + self.ric
+        fields = data
+        dbtime = False
+        tags = {}
+        tags.update({"symbol":self.ric})
+        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
+
+    def _write_other_data(self,data, dt):
+        measurement_temp = "refinitiv_" + dt + "_" + self.ric
+        measurement = measurement_temp.lower()
+        fields = data
+        dbtime = False
+        tags = {}
+        tags.update({"symbol":self.ric})
+        host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
     def _process_message(self, message_json):
         """ Parse at high level and output JSON of message """
@@ -107,9 +136,44 @@ class WebSocketMarketPrice:
         """ Called when message received, parse message into JSON for processing """
         print("RECEIVED on " + self.session_name + ":")
         message_json = json.loads(message)
-        print(json.dumps(message_json, sort_keys=True, indent=2, separators=(',', ':')))
+        data = json.dumps(message_json, sort_keys=True, indent=2, separators=(',', ':'))
 
         for singleMsg in message_json:
+            #print(singleMsg)
+            try:
+                print(singleMsg['UpdateType'], singleMsg['Fields'])
+                if singleMsg['UpdateType'] == 'Quote':
+                    quote = singleMsg['Fields']
+                    try:
+                        self._write_quote_data(quote)
+                    except:
+                        error = traceback.format_exc()
+                        print(error)
+                        measurement = "refinitiv_trades_" + self.ric
+                        logger(measurement, error, self.ric)
+
+                elif singleMsg['UpdateType'] == 'Trade':
+                    trades = singleMsg['Fields']
+                    try:
+                        self._write_trades_data(trades)
+                    except:
+                        error = traceback.format_exc()
+                        print(error)
+                        measurement = "refinitiv_quote_" + self.ric
+                        logger(measurement, error, self.ric)
+                else:
+                    data = singleMsg['Fields']
+                    data_type = singleMsg['UpdateType']
+                    try:
+                        self._write_trades_data(data,data_type)
+                    except:
+                        error = traceback.format_exc()
+                        print(error)
+                        measurement = "refinitiv_data_" + self.ric
+                        logger(measurement, error, self.ric)
+
+            except:
+                pass
             self._process_message(singleMsg)
 
     def _on_error(self, error):
