@@ -7,7 +7,8 @@ import websocket
 import threading
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
+pkg_dir = os.path.dirname(current_dir)
+sys.path.append(pkg_dir)
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 from utility.error_logger_writer import logger
