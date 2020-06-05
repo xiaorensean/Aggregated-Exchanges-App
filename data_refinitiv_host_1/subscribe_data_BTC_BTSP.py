@@ -371,7 +371,7 @@ def get_sts_token(current_refresh_token, url=None):
 
 
 if __name__ == "__main__":
-    ric = "TYc1"
+    ric = "BTC=BTSP"
     if position == '':
         # Populate position if possible
         try:

@@ -134,7 +134,7 @@ class WebSocketMarketPrice:
         data = json.dumps(message_json, sort_keys=True, indent=2, separators=(',', ':'))
 
         for singleMsg in message_json:
-            #print(singleMsg)
+            print(singleMsg)
             try:
                 #print(singleMsg['UpdateType'], singleMsg['Fields'])
                 data = singleMsg['Fields']
