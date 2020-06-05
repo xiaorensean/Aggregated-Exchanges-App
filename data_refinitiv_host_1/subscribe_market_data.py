@@ -10,9 +10,10 @@ symbols = ["USc1", "TYc1", "FVc1", "TUc1", "1YMc1", "ESc1", "NQc1", "CLc1", "NGc
            "NGc1", "HOc1", "BTC=", "BTC=BTSP", "LTC=BTSP", "ETH=BTSP", "BCH=BTSP", "XRP=BTSP"]
 
 if __name__ == "__main__":
-    processes = {}
-    for symb in symbols:
-        print(symb)
-        data = mp.Process(target=fetch_market_data, args=(symb,))
-        data.start()
-        processes.update({symb:data})
+    fetch_market_data(symbols[0])
+    #processes = {}
+    #for symb in symbols:
+    #    print(symb)
+    #    data = mp.Process(target=fetch_market_data, args=(symb,))
+    #    data.start()
+    #    processes.update({symb:data})
