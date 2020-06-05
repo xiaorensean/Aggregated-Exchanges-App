@@ -96,8 +96,10 @@ class WebSocketMarketPrice:
     def _write_market_data(self,data, dt):
         ticker = self.ric
         if "=" in ticker:
-            ticker_new = ticker.replace("=","_")
-        measurement = "refinitiv_" + dt + "_" + ticker_new
+            ticker = ticker.replace("=","_")
+        else:
+            pass
+        measurement = "refinitiv_" + dt + "_" + ticker
         fields = data
         # write everything as float
         for key, value in fields.items():
