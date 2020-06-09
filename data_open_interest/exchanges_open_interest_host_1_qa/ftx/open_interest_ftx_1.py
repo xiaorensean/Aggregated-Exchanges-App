@@ -24,7 +24,10 @@ contract_names_half = contract_names[:int(len(contract_names)/2)]
 def write_open_interest_data(measurement):
     for symbol in contract_names_half:
         fields = {}
-        coin_oi = get_futures_stats(symbol)['openInterest']
+        try:
+            coin_oi = get_futures_stats(symbol)['openInterest']
+        except:
+            return 
         usd_oi = get_future(symbol)['last'] * coin_oi
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":get_future(symbol)["underlying"]})
