@@ -7,9 +7,10 @@ pkg_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pat
 sys.path.append(pkg_dir)
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
+from influxdb_client.influxdb_client_qa_host_1 import InfluxClientHostQA1
 from api_ftx.FtxRestApi import get_futures_stats, get_future, get_contract_names
 
-host_1 = InfluxClientHost1()
+host_1 = InfluxClientHostQA1()
 host_2 = InfluxClientHost2()
 
 measurement = "exchange_open_interest"

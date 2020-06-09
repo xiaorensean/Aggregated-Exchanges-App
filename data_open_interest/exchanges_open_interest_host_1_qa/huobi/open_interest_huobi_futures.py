@@ -7,11 +7,12 @@ pkg_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pat
 sys.path.append(pkg_dir)
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
+from influxdb_client.influxdb_client_qa_host_1 import InfluxClientHostQA1
 from api_huobi.HuobiRestApi import get_swap_info, get_swap_open_interest, \
                      contract_info, contract_open_interest, \
                      get_swap_index_price, contract_index_price    
 
-host_1 = InfluxClientHost1()
+host_1 = InfluxClientHostQA1()
 host_2 = InfluxClientHost2()
 
 measurement = "exchange_open_interest"
