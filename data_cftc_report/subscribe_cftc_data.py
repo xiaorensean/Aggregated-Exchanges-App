@@ -8,9 +8,9 @@ pkg_dir = os.path.dirname(current_dir)
 sys.path.append(pkg_dir)
 from influxdb_client.influxdb_client_host_1 import InfluxClientHost1
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
+from influxdb_client.influxdb_client_qa_host_1 import InfluxClientHostQA1
 
-
-host_1 = InfluxClientHost1()
+host_1 = InfluxClientHostQA1()
 host_2 = InfluxClientHost2()
 
 
@@ -28,10 +28,10 @@ def fields_data_clean(df_dict):
 
 
 def write_all_data(host,measurement):
-    all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut") if i != ".DS_Store"]))
+    all_file = list(sorted([i for i in os.listdir(current_dir+"/deafut_hist") if i != ".DS_Store"]))
     for file in all_file:
         print("Writing " + file)
-        df = pd.read_excel(current_dir + "/deafut/" + file)
+        df = pd.read_excel(current_dir + "/deafut_hist/" + file)
         df_dict_raw = df.T.to_dict()
         data = [df_dict_raw[i] for i in df_dict_raw]
         write_cftc_report(data, host, measurement)
@@ -54,4 +54,4 @@ def write_cftc_report(df_dict,host,measurement):
 
 if __name__ == "__main__":
     write_all_data(host_1,measurement)
-    write_all_data(host_2,measurement)
+    #write_all_data(host_2,measurement)
