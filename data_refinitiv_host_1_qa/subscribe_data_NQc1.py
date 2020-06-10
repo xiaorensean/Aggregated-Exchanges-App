@@ -145,7 +145,7 @@ class WebSocketSession:
         tags.update({"symbol":self.ric})
         host_1.write_points_to_measurement(measurement,dbtime,tags,fields)
 
-    def _write_vwap(self, data):
+    def _write_vwap(self,data):
         ticker = self.ric
         if "=" in ticker:
             ticker = ticker.replace("=", "_")
@@ -153,15 +153,14 @@ class WebSocketSession:
             pass
         measurement = "refinitiv_Trade" + "_" + ticker + "_1m"
         fields = {}
-        fields.update({"VWAP": data['VWAP']})
+        fields.update({"VWAP":data['VWAP']})
         fields.update({"is_api_return_timestamp": True})
         dbtime = False
         tags = {}
         tags.update({"symbol": self.ric})
         host_1.write_points_to_measurement(measurement, dbtime, tags, fields)
 
-        # Callback events from WebSocketApp
-
+    # Callback events from WebSocketApp
     def _on_message(self, message):
         """ Called when message received, parse message into JSON for processing """
         print("RECEIVED on " + self.session_name + ":")
@@ -171,13 +170,15 @@ class WebSocketSession:
         for singleMsg in message_json:
             print(singleMsg)
             try:
-                # print(singleMsg['UpdateType'], singleMsg['Fields'])
+                #print(singleMsg['UpdateType'], singleMsg['Fields'])
                 data = singleMsg['Fields']
                 data_type = singleMsg['UpdateType']
                 if data_type == "Trade":
                     try:
                         self._write_vwap(data)
                     except KeyError:
+                        pass
+                    except:
                         error = traceback.format_exc()
                         print(error)
                         measurement = "refinitiv_Trade" + "_" + self.ric + "_1m"
@@ -194,6 +195,7 @@ class WebSocketSession:
             except:
                 pass
             self._process_message(singleMsg)
+
 
     def _on_error(self, error):
         """ Called when websocket error has occurred """
