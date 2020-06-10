@@ -27,7 +27,7 @@ def write_open_interest_data(measurement):
         try:
             coin_oi = get_futures_stats(symbol)['openInterest']
         except:
-            return 
+            return
         usd_oi = get_future(symbol)['last'] * coin_oi
         fields.update({"coin_denominated_open_interest":float(coin_oi)})
         fields.update({"coin_denominated_symbol":get_future(symbol)["underlying"]})
