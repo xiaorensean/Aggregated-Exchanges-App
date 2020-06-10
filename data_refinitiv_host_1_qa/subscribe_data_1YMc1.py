@@ -177,6 +177,8 @@ class WebSocketSession:
                     try:
                         self._write_vwap(data)
                     except KeyError:
+                        pass
+                    except:
                         error = traceback.format_exc()
                         print(error)
                         measurement = "refinitiv_Trade" + "_" + self.ric + "_1m"
