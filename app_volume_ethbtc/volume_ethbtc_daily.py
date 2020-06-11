@@ -21,6 +21,13 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
 
+def checkIfUTCMidnight():
+    utcnow = datetime.datetime.utcnow()
+    seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
+    return seconds_since_utcmidnight == 0
+
+
+
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
     return format(v1,",")
@@ -139,11 +146,11 @@ def volume_report():
     smtp.quit()
 
 if __name__ == "__main__":
-    volume_report()
+
     while True:
-        time.sleep(60*60*24)
-        try:
-            volume_report()
-        except: 
-            time.sleep(60*60)
-            pass
+        if checkIfUTCMidnight():
+            try:
+                volume_report()
+            except:
+                time.sleep(60*60)
+                pass
