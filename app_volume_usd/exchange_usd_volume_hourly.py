@@ -120,10 +120,10 @@ def usd_volume_report():
     vol_total = vol_cb + vol_kr + vol_bf
     data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
     write_data(measurement, data_total, "agg")
-    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-    vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+    vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
+    vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
+    vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
+    vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
     vol_total_delta = vol_total - vol_total_prev
     vol_bf_delta = vol_bf - vol_bf_prev
     vol_cb_delta = vol_cb - vol_cb_prev
