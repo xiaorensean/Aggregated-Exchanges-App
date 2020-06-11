@@ -48,7 +48,7 @@ def usd_volume_report():
     for d in data:
         if "USD" in d[0] and d[0] != "fUSD":
             print(d[0], float(d[8]) * float(d[7]))
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'bitfinex' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'bitfinex' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(d[0])], "raw")[0]['volume']
             volume = float(d[8]) * float(d[7])
             data_bf_delta.update({d[0]:value_type_convert(volume-data_prev)})
             try:
@@ -58,9 +58,9 @@ def usd_volume_report():
             vol_bf += volume
             data_bf.update({d[0]: value_type_convert(volume)})
             data_bf_db.update({d[0]: volume})
-            write_data(measurement, data_bf_db, "bitfinex")
         else:
             pass
+    write_data(measurement, data_bf_db, "bitfinex")
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
@@ -119,16 +119,16 @@ def usd_volume_report():
     # Aggregate
     vol_total = vol_cb + vol_kr + vol_bf
     data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
+    write_data(measurement, data_total, "agg")
     vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-    write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
     vol_bf_delta = vol_bf - vol_bf_prev
     vol_cb_delta = vol_cb - vol_cb_prev
     vol_kr_delta = vol_kr - vol_kr_prev
-    df_bitfinex = pd.DataFrame([data_bf, data_delta_bf, data_delta_percentage_fb],
+    df_bitfinex = pd.DataFrame([data_bf, data_bf_delta, data_delta_percentage_bf],
                                index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
     df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb],
                                index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
@@ -186,17 +186,17 @@ def usd_volume_report():
     smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
     #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
-    
+
     
 
 if __name__ == "__main__":
-    time.sleep(60*60)
+    #time.sleep(60*60)
     usd_volume_report()
-    while True:
-        time.sleep(60*60)
-        try:
-            usd_volume_report()
-        except:
-            time.sleep(30*60)
-            usd_volume_report()
+    #while True:
+    #    time.sleep(60*60)
+    #    try:
+    #        usd_volume_report()
+    #    except:
+    #        time.sleep(30*60)
+    #        usd_volume_report()
 

@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import datetime
 import pandas as pd
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -15,6 +16,12 @@ import api_coinbase.coinbaseRestApi as coinbase
 import api_kraken.KrakenRestApi as kraken
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
+
+def checkIfUTCMidnight():
+    utcnow = datetime.datetime.utcnow()
+    seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
+    return seconds_since_utcmidnight == 0
+
 
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
@@ -145,12 +152,11 @@ def usd_volume_report():
     
     
 if __name__ == "__main__":
-    usd_volume_report()
     while True:
-        time.sleep(60*60*24)
-        try:
-            usd_volume_report()
-        except:
-            time.sleep(60*60)
-            usd_volume_report()
+        if checkIfUTCMidnight():
+            try:
+                usd_volume_report()
+            except:
+                time.sleep(60*60)
+                usd_volume_report()
     
