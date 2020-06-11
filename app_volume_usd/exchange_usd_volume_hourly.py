@@ -13,11 +13,14 @@ sys.path.append(os.path.dirname(current_dir))
 
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
+from api_bitfinex.BfxRest import BITFINEXCLIENT
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
+bapi = BITFINEXCLIENT("","")
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
+
 
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
@@ -35,6 +38,29 @@ def write_data(measurement,data,exchange_tag):
 
 
 def usd_volume_report():
+    # bitfinex
+    data_bf = {}
+    data_bf_db = {}
+    data_bf_delta = {}
+    data_delta_percentage_bf = {}
+    vol_bf = 0
+    data = bapi.get_public_tickers("ALL")
+    for d in data:
+        if "USD" in d[0] and d[0] != "fUSD":
+            print(d[0], float(d[8]) * float(d[7]))
+            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'bitfinex' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+            volume = float(d[8]) * float(d[7])
+            data_bf_delta.update({d[0]:value_type_convert(volume-data_prev)})
+            try:
+                data_delta_percentage_bf.update({d[0]: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
+            except:
+                data_delta_percentage_bf.update({d[0]: str(0.00) + "%"})
+            vol_bf += volume
+            data_bf.update({d[0]: value_type_convert(volume)})
+            data_bf_db.update({d[0]: volume})
+            write_data(measurement, data_bf_db, "bitfinex")
+        else:
+            pass
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
@@ -61,9 +87,9 @@ def usd_volume_report():
         data_cb.update({t: value_type_convert(volume)})
         data_cb_db.update({t: volume})
     write_data(measurement, data_cb_db, "coinbase")
-    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()]
 
     # Kraken
+    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()]
     ticker_kr = [i['altname'] for i in tickers_kr if
                  i['quote'] == "ZUSD" and i['altname'] != 'ETHUSD.d' and i['altname'] != 'XBTUSD.d' and i[
                      'altname'] != 'GBPUSD' and i['altname'] != 'EURUSD']
@@ -91,19 +117,24 @@ def usd_volume_report():
         data_kr_db.update({t: volume})
     write_data(measurement, data_kr_db, "kraken")
     # Aggregate
-    vol_total = vol_cb + vol_kr
-    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr}
+    vol_total = vol_cb + vol_kr + vol_bf
+    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
     vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+    vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
     write_data(measurement, data_total, "agg")
     vol_total_delta = vol_total - vol_total_prev
+    vol_bf_delta = vol_bf - vol_bf_prev
     vol_cb_delta = vol_cb - vol_cb_prev
     vol_kr_delta = vol_kr - vol_kr_prev
+    df_bitfinex = pd.DataFrame([data_bf, data_delta_bf, data_delta_percentage_fb],
+                               index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
     df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb],
                                index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
     df_kraken = pd.DataFrame([data_kr, data_delta_kr, data_delta_percentage_kr],
                              index=['volume', 'volume_change_hourly', 'volume_change_percentage']).T
+    bf_report = df_bitfinex.to_html()
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
 
@@ -119,6 +150,13 @@ def usd_volume_report():
        <h1 style="font-size:15px;"> Total USD Volume Summary: </h1>
        <p> Total Current 24H USD Volume: {} </p>
        <p> Total 24H USD Volume Change: {} </p>
+       <h1 style="font-size:15px;"> Bitfinex USD Volume Summary: </h1>
+       <p> Bitfinex Current 24H USD Volume: {} </p>
+       <p> Bitfinex 24H USD Volume Change: {} </p>
+       <h3 style="font-size:15px;"> Bitfinex Tickers Breakdown: </h3>
+       <p>
+            {}
+       </p>
        <h1 style="font-size:15px;"> Coinbase USD Volume Summary: </h1>
        <p> Coinbase Current 24H USD Volume: {} </p>
        <p> Coinbase 24H USD Volume Change: {} </p>
@@ -135,9 +173,10 @@ def usd_volume_report():
        </p>
        </body>
      </html>
-           """.format(value_type_convert(vol_total), value_type_convert(vol_total_delta), value_type_convert(vol_cb),
-                      value_type_convert(vol_cb_delta), cb_report, value_type_convert(vol_kr),
-                      value_type_convert(vol_kr_delta), kr_report, )
+           """.format(value_type_convert(vol_total), value_type_convert(vol_total_delta),
+                      value_type_convert(vol_bf), value_type_convert(vol_bf_delta), bf_report,
+                      value_type_convert(vol_cb),value_type_convert(vol_cb_delta), cb_report,
+                      value_type_convert(vol_kr),value_type_convert(vol_kr_delta), kr_report, )
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
@@ -149,7 +188,7 @@ def usd_volume_report():
     smtp.quit()
     
     
-    
+
 if __name__ == "__main__":
     time.sleep(60*60)
     usd_volume_report()
@@ -160,4 +199,4 @@ if __name__ == "__main__":
         except:
             time.sleep(30*60)
             usd_volume_report()
-    
+

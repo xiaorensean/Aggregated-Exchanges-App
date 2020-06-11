@@ -10,12 +10,14 @@ import numpy as np
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 sys.path.append(os.path.dirname(current_dir))
-
+from api_bitfinex.BfxRest import BITFINEXCLIENT
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
+
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
+bfapi = BITFINEXCLIENT("","")
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
 
@@ -31,8 +33,22 @@ def write_data(measurement,data,exchange_tag):
 
 
 def usd_volume_collector():
-    ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
+    # Bitfinex
+    data_bf = {}
+    vol_bf = 0
+    data = bfapi.get_public_tickers("ALL")
+    for d in data:
+        if "USD" in d[0] and d[0] != "fUSD":
+            print(d[0], float(d[8]) * float(d[7]))
+            volume = float(d[8]) * float(d[7])
+            vol_bf += volume
+            data_bf.update({d[0]:volume})
+        else:
+            pass
+    write_data(measurement,data_bf,"bitfinex")
+
     # Coinbase
+    ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
     vol_cb = 0
     for t in ticker_cb:
@@ -43,9 +59,9 @@ def usd_volume_collector():
         vol_cb += volume
         data_cb.update({t:volume})
     write_data(measurement, data_cb, "coinbase")
-    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()] 
-    
+
     # Kraken
+    tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()]
     ticker_kr = [i['altname'] for i in tickers_kr if i['quote'] == "ZUSD" and i['altname']!='ETHUSD.d' and i['altname']!='XBTUSD.d' and i['altname']!='GBPUSD' and i['altname'] != 'EURUSD']
     data_kr = {}
     vol_kr = 0
