@@ -400,7 +400,7 @@ def get_sts_token(current_refresh_token, url=None):
 
 
 if __name__ == "__main__":
-    ric = "BRR"
+    ric = "BRR.X"
     if position == '':
         # Populate position if possible
         try:
