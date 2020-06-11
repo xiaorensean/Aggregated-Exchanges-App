@@ -192,11 +192,11 @@ def usd_volume_report():
 if __name__ == "__main__":
     #time.sleep(60*60)
     usd_volume_report()
-    #while True:
-    #    time.sleep(60*60)
-    #    try:
-    #        usd_volume_report()
-    #    except:
-    #        time.sleep(30*60)
-    #        usd_volume_report()
+    while True:
+        time.sleep(60*60)
+        try:
+            usd_volume_report()
+        except:
+            time.sleep(30*60)
+            usd_volume_report()
 
