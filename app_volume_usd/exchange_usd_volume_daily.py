@@ -14,11 +14,12 @@ sys.path.append(os.path.dirname(current_dir))
 
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
+from api_bitfinex.BfxRest import BITFINEXCLIENT
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 
-
+bapi = BITFINEXCLIENT("","")
 
 host_2 = InfluxClientHost2()
 measurement = "log_usd_volume_report"
@@ -194,6 +195,7 @@ def usd_volume_report():
     
     
 if __name__ == "__main__":
+#    usd_volume_report()
     while True:
         if checkIfUTCMidnight():
             try:
