@@ -22,6 +22,10 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 db = InfluxClientHost2()
 measurement = "log_ethbtc_volume_report"
 
+def checkIfUTCMidnight():
+    utcnow = datetime.datetime.utcnow()
+    seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
+    return seconds_since_utcmidnight == 0
 
 def get_vol_7d(symbol, exchange):
     db = InfluxClientHost2()
