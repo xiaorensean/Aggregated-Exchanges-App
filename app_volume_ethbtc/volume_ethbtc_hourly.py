@@ -20,7 +20,21 @@ from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 db = InfluxClientHost2()
+
+
 measurement = "log_ethbtc_volume_report"
+
+def get_vol_7d(symbol,exchange):
+    db = InfluxClientHost2()
+    data = db.query_tables(measurement,["*","where time > now() - 7d and exchange = '{}'".format(exchange)],"raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += db[symbol]
+    vol_7d = vol_tot/numPeriod
+    return vol_7d
+
 
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
@@ -39,12 +53,14 @@ def write_log(exchange,btc_volume,eth_volume):
 
 
 def data_df(exchange,btc_volume,eth_volume):
-    dbb = db.query_tables(measurement, ["*","where exchange = '{}' and symbol = 'ETHBTC' and time > now() - 1d order by time limit 1".format(exchange)])
+    dbb = db.query_tables(measurement, ["*","where exchange = '{}' and symbol = 'ETHBTC' and time > now() - 1h order by time limit 1".format(exchange)])
     btc_volume_delta = btc_volume - dbb['btc_volume'].tolist()[0]
     eth_volume_delta = eth_volume - dbb['eth_volume'].tolist()[0]
     btc_volume_per = str(np.round((btc_volume - dbb['btc_volume'].tolist()[0])/dbb['btc_volume'].tolist()[0] * 100,decimals=2))+"%"
     eth_volume_per = str(np.round((eth_volume - dbb['eth_volume'].tolist()[0])/dbb['eth_volume'].tolist()[0] * 100,decimals=2))+"%"
-    dfb = pd.DataFrame([exchange,value_type_convert(btc_volume),value_type_convert(btc_volume_delta),btc_volume_per,value_type_convert(eth_volume),value_type_convert(eth_volume_delta),eth_volume_per])
+    btc_vol_7d = get_vol_7d("btc_volume",exchange)
+    eth_vol_7d = get_vol_7d("eth_volume",exchange)
+    dfb = pd.DataFrame([exchange,value_type_convert(btc_volume),value_type_convert(btc_volume_delta),btc_volume_per,value_type_convert(btc_vol_7d),value_type_convert(eth_volume),value_type_convert(eth_volume_delta),eth_volume_per,value_type_convert(eth_vol_7d)])
     dfb = dfb.T
     return dfb
 
@@ -108,7 +124,7 @@ def volume_report():
 
 
     df = pd.concat([dfb,dfc,dfh,dfo,dfk])
-    df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","ETH_volume","ETH_volume_change","ETH_volume_percentage"]
+    df.columns = ["Exchange","BTC_volume","BTC_volume_change","BTC_volume_percentage","BTC_volume_7d","ETH_volume","ETH_volume_change","ETH_volume_percentage","ETH_volume_7d"]
     report = df.to_html(index=False)
     
     # gmail part
@@ -133,8 +149,8 @@ def volume_report():
     #smtp.set_debuglevel(1)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com","921211@Rx")
-    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
@@ -143,6 +159,6 @@ if __name__ == "__main__":
         time.sleep(60*60)
         try:
             volume_report()
-        except: 
+        except:
             time.sleep(60*60)
             pass
