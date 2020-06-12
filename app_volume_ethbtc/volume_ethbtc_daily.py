@@ -147,7 +147,7 @@ def volume_report():
     smtp.quit()
 
 if __name__ == "__main__":
-    volume_report()
+    #volume_report()
     while True:
         if checkIfUTCMidnight():
             try:
