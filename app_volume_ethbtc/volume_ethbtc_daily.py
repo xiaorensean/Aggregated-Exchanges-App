@@ -170,11 +170,12 @@ def volume_report():
     smtp.quit()
 
 if __name__ == "__main__":
-    #volume_report()
+    volume_report()
     while True:
-        if checkIfUTCMidnight():
-            try:
-                volume_report()
-            except:
-                time.sleep(60*60)
-                pass
+        time.sleep(60*60*24)
+        #if checkIfUTCMidnight():
+        try:
+            volume_report()
+        except:
+            time.sleep(60*60)
+            pass

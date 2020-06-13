@@ -195,12 +195,13 @@ def usd_volume_report():
     
     
 if __name__ == "__main__":
-#    usd_volume_report()
+    usd_volume_report()
     while True:
-        if checkIfUTCMidnight():
-            try:
-                usd_volume_report()
-            except:
-                time.sleep(60*60)
-                usd_volume_report()
+        time.sleep(60*60*24)
+        #if checkIfUTCMidnight():
+        try:
+            usd_volume_report()
+        except:
+            time.sleep(60*60)
+            usd_volume_report()
     
