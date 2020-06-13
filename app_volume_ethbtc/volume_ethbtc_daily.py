@@ -82,7 +82,6 @@ def volume_report():
     exchange_b = "Binance"
     btc_volume_b = float(data_binance['quoteVolume'])
     eth_volume_b = float(data_binance['volume'])
-    print(dfb)
     write_log(exchange_b, btc_volume_b, eth_volume_b)
     dfb = data_df(exchange_b, btc_volume_b, eth_volume_b)
 
@@ -94,7 +93,6 @@ def volume_report():
     exchange_c = "Coinbase"
     eth_volume_c = float(data_coinbase['volume'])
     btc_volume_c = float(data_coinbase['last']) * eth_volume_c
-    print(dfc)
     write_log(exchange_c, btc_volume_c, eth_volume_c)
     dfc = data_df(exchange_c, btc_volume_c, eth_volume_c)
 
@@ -106,7 +104,6 @@ def volume_report():
     exchange_h = "Huobi"
     btc_volume_h = float(data_huobi['vol'])
     eth_volume_h = btc_volume_h / float(data_huobi['close'])
-    print(dfh)
     write_log(exchange_h, btc_volume_h, eth_volume_h)
     dfh = data_df(exchange_h, btc_volume_h, eth_volume_h)
 
@@ -118,7 +115,6 @@ def volume_report():
     exchange_o = "Okex"
     btc_volume_o = float(data_okex[0]['coinVolume'])
     eth_volume_o = float(data_okex[0]['volume'])
-    print(dfo)
     write_log(exchange_o, btc_volume_o, eth_volume_o)
     dfo = data_df(exchange_o, btc_volume_o, eth_volume_o)
 
@@ -133,7 +129,6 @@ def volume_report():
     # 24h volume
     eth_volume_k = float(data_kraken['v'][1])
     btc_volume_k = eth_volume_k * float(data_kraken['c'][0])
-    print(dfk)
     write_log(exchange_k, btc_volume_k, eth_volume_k)
     dfk = data_df(exchange_k, btc_volume_k, eth_volume_k)
 
