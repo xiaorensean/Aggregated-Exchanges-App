@@ -140,7 +140,7 @@ def volume_report():
 
     # gmail part
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "ETHBTC 24H Volume Report Hourly"
+    msg['Subject'] = "ETHBTC 24H Volume Report Daily"
     msg['From'] = 'xiao@virgilqr.com'
 
     html = """\
@@ -160,8 +160,8 @@ def volume_report():
     # smtp.set_debuglevel(1)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com", "921211@Rx")
-    # smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
 if __name__ == "__main__":
