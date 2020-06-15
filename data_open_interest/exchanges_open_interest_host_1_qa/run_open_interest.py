@@ -20,8 +20,8 @@ processes = []
 
 scripts = [
     "binance/open_interest_binance.py",
-    #"bitmex/open_interest_bitmex.py",
-    #"bitmex/open_interest_bitmex_ws.py",
+    "bitmex/open_interest_bitmex.py",
+    "bitmex/open_interest_bitmex_ws.py",
     "bybit/open_interest_bybit.py",
     "deribit/open_interest_deribit_btc.py",
     "deribit/open_interest_deribit_eth.py",
