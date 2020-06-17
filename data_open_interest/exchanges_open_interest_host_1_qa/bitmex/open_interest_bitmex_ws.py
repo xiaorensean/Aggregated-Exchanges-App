@@ -18,7 +18,7 @@ host_1 = InfluxClientHostQA1()
 host_2 = InfluxClientHost2()
 
 def write_instrument_data(data):
-    measurement = "bitmex_instrument_v1"
+    measurement = "bitmex_instrument"
     for d in data:
         dbtime = False
         tags = {}
