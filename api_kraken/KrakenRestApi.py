@@ -23,10 +23,7 @@ def get_tickers(symbol):
     
     return data
 
-
-
-
-
 if __name__ == "__main__":
-    symbol = "XETHXXBT"
-    data = get_tickers(symbol)    
+    tickers = [get_asset_pairs_info()[i]['altname'] for i in get_asset_pairs_info()]
+    print(tickers)
+
