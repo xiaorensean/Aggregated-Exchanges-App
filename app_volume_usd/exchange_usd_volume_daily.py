@@ -27,7 +27,12 @@ measurement = "log_usd_volume_report"
 def checkIfUTCMidnight():
     utcnow = datetime.datetime.utcnow()
     seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
-    return seconds_since_utcmidnight == 0
+    if int(seconds_since_utcmidnight) == 0:
+        run_script = True
+        time.sleep(1)
+    else:
+        run_script = False
+    return run_script
 
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
@@ -195,13 +200,13 @@ def usd_volume_report():
     
     
 if __name__ == "__main__":
-    usd_volume_report()
+    #usd_volume_report()
     while True:
-        time.sleep(60*60*24)
-        #if checkIfUTCMidnight():
-        try:
-            usd_volume_report()
-        except:
-            time.sleep(60*60)
-            usd_volume_report()
+        #time.sleep(60*60*24)
+        if checkIfUTCMidnight():
+            try:
+                usd_volume_report()
+            except:
+                time.sleep(60*60)
+                usd_volume_report()
     

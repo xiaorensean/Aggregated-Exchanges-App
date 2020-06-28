@@ -25,7 +25,12 @@ measurement = "log_ethbtc_volume_report"
 def checkIfUTCMidnight():
     utcnow = datetime.datetime.utcnow()
     seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
-    return seconds_since_utcmidnight == 0
+    if int(seconds_since_utcmidnight) == 0:
+        run_script = True
+        time.sleep(1)
+    else:
+        run_script = False
+    return run_script
 
 def get_vol_7d(symbol, exchange):
     db = InfluxClientHost2()
@@ -165,12 +170,12 @@ def volume_report():
     smtp.quit()
 
 if __name__ == "__main__":
-    volume_report()
+    #volume_report()
     while True:
-        time.sleep(60*60*24)
-        #if checkIfUTCMidnight():
-        try:
-            volume_report()
-        except:
-            time.sleep(60*60)
-            pass
+        #time.sleep(60*60*24)
+        if checkIfUTCMidnight():
+            try:
+                volume_report()
+            except:
+                time.sleep(60*60)
+                pass
