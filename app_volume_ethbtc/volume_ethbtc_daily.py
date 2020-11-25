@@ -43,6 +43,28 @@ def get_vol_7d(symbol, exchange):
     vol_7d = vol_tot / numPeriod
     return vol_7d
 
+def get_vol_30d(symbol, exchange):
+    db = InfluxClientHost2()
+    data = db.query_tables(measurement, ["*", "where time > now() - 30d and exchange = '{}'".format(exchange)], "raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += db[symbol]
+    vol_7d = vol_tot / numPeriod
+    return vol_7d
+
+def get_vol_90d(symbol, exchange):
+    db = InfluxClientHost2()
+    data = db.query_tables(measurement, ["*", "where time > now() - 90d and exchange = '{}'".format(exchange)], "raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += db[symbol]
+    vol_7d = vol_tot / numPeriod
+    return vol_7d
+
 
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
@@ -78,6 +100,18 @@ def data_df(exchange, btc_volume, eth_volume):
     dfb = dfb.T
     return dfb
 
+
+def get_relative_percentage(symbol,exchange):
+    d7 = get_vol_7d(symbol,exchange)
+    d30 = get_vol_30d(symbol,exchange)
+    d90 = get_vol_90d(symbol,exchange)
+    delta30 = d30 - d7
+    delta30_per = (d30 - d7)/d7*100
+    delta90 = d90 - d7
+    delta90_per = (d90 - d7)/d7*100
+    df = pd.DataFrame([str(np.round(delta30_per,3))+"%",str(np.round(delta90_per,3))+"%"],columns=[exchange])
+    #df.index = ["30VS7","90VS7"]
+    return df
 
 def volume_report():
     # binance
@@ -143,6 +177,15 @@ def volume_report():
                   "ETH_volume_change", "ETH_volume_percentage", "ETH_volume_7d"]
     report = df.to_html(index=False)
 
+    # relative changes
+    dfs = []
+    exchanges = ["Binance", "Coinbase", "Huobi", "Okex", "Kraken"]
+    for e in exchanges:
+        dfs.append(get_relative_percentage("btc_volume", e))
+    all_exchange = pd.concat(dfs, axis=1)
+    all_exchange.index = ["30d_VS_7d", "90d_VS_7d"]
+    report_relative_per = all_exchange.to_html()
+
     # gmail part
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "ETHBTC 24H Volume Report Daily"
@@ -152,10 +195,13 @@ def volume_report():
     <html>
       <head></head>
       <body>
+      <h1 style="font-size:15px;"> Volume Report: </h1>
+          {}
+      <h2 style="font-size:15px;"> Relative Change Percentage: </h2>
           {}
       </body>
     </html>
-          """.format(report)
+          """.format(report,report_relative_per)
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
@@ -168,6 +214,7 @@ def volume_report():
     smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
     #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
+
 
 if __name__ == "__main__":
     #volume_report()
