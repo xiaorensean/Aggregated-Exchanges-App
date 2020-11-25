@@ -34,6 +34,54 @@ def checkIfUTCMidnight():
         run_script = False
     return run_script
 
+def get_vol_7d(symbol):
+    data = host_2.query_tables(measurement, ["*", "where exchange = 'agg' and symbol = '{}' and time > now() - 7d".format(symbol)], "raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += float(db["volume"])
+    vol_7d = vol_tot / numPeriod
+    print(vol_tot)
+    print(numPeriod)
+    return vol_7d
+
+def get_vol_30d(symbol):
+    data = host_2.query_tables(measurement, ["*", "where exchange = 'agg' and symbol = '{}' and time > now() - 30d".format(symbol)], "raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += float(db["volume"])
+    vol_30d = vol_tot / numPeriod
+    print(vol_tot)
+    print(numPeriod)
+    return vol_30d
+
+def get_vol_90d(symbol):
+    data = host_2.query_tables(measurement, ["*", "where exchange = 'agg' and symbol = '{}' and time > now() - 90d".format(symbol)], "raw")
+    vol_tot = 0
+    numPeriod = 0
+    for db in data:
+        numPeriod += 1
+        vol_tot += float(db["volume"])
+    vol_90d = vol_tot / numPeriod
+    print(vol_tot)
+    print(numPeriod)
+    return vol_90d
+
+def get_relative_percentage(symbol):
+    d7 = get_vol_7d(symbol)
+    d30 = get_vol_30d(symbol)
+    d90 = get_vol_90d(symbol)
+    delta30 = d30 - d7
+    delta30_per = (d7 - d30)/d30*100
+    delta90 = d90 - d7
+    delta90_per = (d7 - d90)/d90*100
+    df = pd.DataFrame([str(np.round(delta30_per,3))+"%",str(np.round(delta90_per,3))+"%"],columns=[symbol])
+    #df.index = ["30VS7","90VS7"]
+    return df
+
 def value_type_convert(value):
     v1 = float("{:.2f}".format(round(value, 2)))
     return format(v1,",")
@@ -47,6 +95,7 @@ def write_data(measurement,data,exchange_tag):
         tags.update({"exchange":exchange_tag})
         dbtime = False
         host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+
 
 def usd_volume_report():
     # bitfinex
@@ -83,12 +132,23 @@ def usd_volume_report():
         print(t)
         time.sleep(2)
         data = coinbase.get_market_stats(t)
+        print(data)
         try:
             data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1d order by time limit 1".format(t)], "raw")[0]['volume']
         except IndexError:
-            data_new = {t: float(data['volume']) * float(data['last'])}
-            write_data(measurement, data_new, "coinbase")
-        volume = float(data['volume']) * float(data['last'])
+            data_prev = {t: float(data['volume']) * float(data['last'])}
+            fields = {}
+            tags = {}
+            fields.update({"volume": data_prev})
+            tags.update({"symbol": t})
+            tags.update({"exchange": "coinbase"})
+            dbtime = False
+            host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+
+        try:
+            volume = float(data['volume']) * float(data['last'])
+        except:
+            volume = 0
         data_delta_cb.update({t: value_type_convert(volume - data_prev)})
         try:
             data_delta_percentage_cb.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
@@ -112,12 +172,23 @@ def usd_volume_report():
     for t in ticker_kr:
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
+        print(data)
         try:
             data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1d order by time limit 1".format(t)], "raw")[0]['volume']
-        except IndexError:
-            data_new = {t: float(data['volume']) * float(data['last'])}
-            write_data(measurement, data_new, "kraken")
-        volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
+        except:
+            data_prev = float(data[0]["v"][1])
+            fields = {}
+            tags = {}
+            fields.update({"volume": data_prev})
+            tags.update({"symbol": t})
+            tags.update({"exchange": "kraken"})
+            dbtime = False
+            host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+        #try:
+        #    volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
+        #except:
+        #    volume = 0
+        volume = float(data[0]["v"][0])
         data_delta_kr.update({t: value_type_convert(volume - data_prev)})
         try:
             data_delta_percentage_kr.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
@@ -149,6 +220,13 @@ def usd_volume_report():
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
 
+    symbol = ["vol_bf", "vol_cb", "vol_kr"]
+    dfs = []
+    for symb in symbol:
+        dfs.append(get_relative_percentage(symb))
+    relative_per_df = pd.concat(dfs, axis=1)
+    relative_per_df.index = ["7d_VS_30d", "7d_VS_90d"]
+    relative_per_report = relative_per_df.to_html()
     # send email with tables
     msg = MIMEMultipart()
     msg['Subject'] = "24H USD Volume Report Daily"
@@ -182,23 +260,32 @@ def usd_volume_report():
        <p>
             {}
        </p>
+        <h4 style="font-size:15px;"> Relative Changes 7d VS 30d && 7d VS 90d </h4>
+       <p>
+            {}
+       </p>
        </body>
      </html>
            """.format(value_type_convert(vol_total), value_type_convert(vol_total_delta),
                       value_type_convert(vol_bf), value_type_convert(vol_bf_delta), bf_report,
                       value_type_convert(vol_cb),value_type_convert(vol_cb_delta), cb_report,
-                      value_type_convert(vol_kr),value_type_convert(vol_kr_delta), kr_report, )
+                      value_type_convert(vol_kr),value_type_convert(vol_kr_delta), kr_report,
+                      relative_per_report)
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
     smtp = smtplib.SMTP('smtp.gmail.com', 587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com", "921211@Rx")
-    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
+    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
-    
-    
+
+
+usd_volume_report()
+
+
+'''''
 if __name__ == "__main__":
     #usd_volume_report()
     while True:
@@ -209,4 +296,4 @@ if __name__ == "__main__":
             except:
                 time.sleep(60*60)
                 usd_volume_report()
-    
+'''

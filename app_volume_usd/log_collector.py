@@ -74,7 +74,7 @@ def usd_volume_collector():
     write_data(measurement, data_kr, "kraken")
     # Total
     vol_total = vol_cb + vol_kr
-    data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr}
+    data_total = {"vol_total":vol_total,"vol_cb":vol_cb,"vol_kr":vol_kr,"vol_bf":vol_bf}
     write_data(measurement, data_total, "agg")
 
 
