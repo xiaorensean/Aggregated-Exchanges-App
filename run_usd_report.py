@@ -16,7 +16,7 @@ process_logger = "logger/exchange_usd_volume_report.txt"
 processes = []
 
 scripts = [
- #"app_volume_usd/exchange_usd_volume_daily.py",
+ "app_volume_usd/exchange_usd_volume_daily.py",
  #"app_volume_usd/exchange_usd_volume_hourly.py",
  "app_volume_usd/log_collector.py"
 ]

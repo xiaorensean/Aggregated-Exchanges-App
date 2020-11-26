@@ -34,6 +34,16 @@ def checkIfUTCMidnight():
         run_script = False
     return run_script
 
+def checkIfMorning():
+    utcnow = datetime.datetime.utcnow()
+    seconds_since_utcmidnight = (utcnow - utcnow.replace(hour=6, minute=0, second=0, microsecond=0)).total_seconds()
+    if int(seconds_since_utcmidnight) == 0:
+        run_script = True
+        time.sleep(1)
+    else:
+        run_script = False
+    return run_script
+
 def get_vol_7d(symbol):
     data = host_2.query_tables(measurement, ["*", "where exchange = 'agg' and symbol = '{}' and time > now() - 7d".format(symbol)], "raw")
     vol_tot = 0
@@ -96,6 +106,14 @@ def write_data(measurement,data,exchange_tag):
         dbtime = False
         host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
 
+def get_delta_percentage(symbol,vol_total):
+    vol_total_delta_7d = vol_total - get_vol_7d(symbol)
+    vol_total_delta_30d = vol_total - get_vol_30d(symbol)
+    vol_total_delta_90d = vol_total - get_vol_90d(symbol)
+    vol_total_delta_7d_per = (vol_total - get_vol_7d(symbol))/get_vol_7d(symbol)*100
+    vol_total_delta_30d_per = (vol_total - get_vol_30d(symbol))/get_vol_30d(symbol)*100
+    vol_total_delta_90d_per = (vol_total - get_vol_90d(symbol))/get_vol_90d(symbol)*100
+    return [vol_total_delta_7d, vol_total_delta_7d_per, vol_total_delta_30d, vol_total_delta_30d_per, vol_total_delta_90d, vol_total_delta_90d_per]
 
 def usd_volume_report():
     # bitfinex
@@ -206,10 +224,26 @@ def usd_volume_report():
     vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
     vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
     vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
+    symbol = ["vol_bf", "vol_cb", "vol_kr"]
+    df_pers = []
+    for symb in symbol:
+        df_per = get_relative_percentage(symb)
+        df_pers.append(df_per)
+    relative_per_df = pd.concat(df_pers, axis=1)
+    relative_per_df.index = ["7d_VS_30d", "7d_VS_90d"]
+    # total deltas & percentage
     vol_total_delta = vol_total - vol_total_prev
+    delta_total = get_delta_percentage("vol_total",vol_total)
+    # bitfinex delta & percentage
     vol_bf_delta = vol_bf - vol_bf_prev
+    delta_bf = get_delta_percentage("vol_bf",vol_bf)
+    # coinbase delta & percentage
     vol_cb_delta = vol_cb - vol_cb_prev
+    delta_cb = get_delta_percentage("vol_cb",vol_cb)
+    # kraken delta & percentage
     vol_kr_delta = vol_kr - vol_kr_prev
+    delta_kr = get_delta_percentage("vol_kr",vol_kr)
+
     df_bitfinex = pd.DataFrame([data_bf, data_bf_delta, data_delta_percentage_bf],
                                index=['volume', 'volume_change_daily', 'volume_change_percentage']).T
     df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb],
@@ -220,12 +254,7 @@ def usd_volume_report():
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
 
-    symbol = ["vol_bf", "vol_cb", "vol_kr"]
-    dfs = []
-    for symb in symbol:
-        dfs.append(get_relative_percentage(symb))
-    relative_per_df = pd.concat(dfs, axis=1)
-    relative_per_df.index = ["7d_VS_30d", "7d_VS_90d"]
+
     relative_per_report = relative_per_df.to_html()
     # send email with tables
     msg = MIMEMultipart()
@@ -239,9 +268,19 @@ def usd_volume_report():
        <h1 style="font-size:15px;"> Total USD Volume Summary: </h1>
        <p> Total Current 24H USD Volume: {} </p>
        <p> Total 24H USD Volume Change: {} </p>
+       <p> Total 7D Mean USD Volume Change: {} </p>
+       <p> Total 30D Mean USD Volume Change: {} </p>
+       <p> Total 90D Mean USD Volume Change: {} </p>
+       <h4 style="font-size:15px;"> Relative Changes 7d VS 30d && 7d VS 90d </h4>
+       <p>
+        {}
+       </p>   
        <h1 style="font-size:15px;"> Bitfinex USD Volume Summary: </h1>
        <p> Bitfinex Current 24H USD Volume: {} </p>
        <p> Bitfinex 24H USD Volume Change: {} </p>
+       <p> Bitfinex 7D Mean USD Volume Change: {} </p>
+       <p> Bitfinex 30D Mean USD Volume Change: {} </p>
+       <p> Bitfinex 90D Mean USD Volume Change: {} </p>
        <h3 style="font-size:15px;"> Bitfinex Tickers Breakdown: </h3>
        <p>
             {}
@@ -249,6 +288,9 @@ def usd_volume_report():
        <h1 style="font-size:15px;"> Coinbase USD Volume Summary: </h1>
        <p> Coinbase Current 24H USD Volume: {} </p>
        <p> Coinbase 24H USD Volume Change: {} </p>
+       <p> Coinbase 7D Mean USD Volume Change: {} </p>
+       <p> Coinbase 30D Mean USD Volume Change: {} </p>
+       <p> Coinbase 90D Mean USD Volume Change: {} </p>
        <h3 style="font-size:15px;"> Coinbase Tickers Breakdown: </h3>
        <p>
             {}
@@ -256,44 +298,57 @@ def usd_volume_report():
        <h1 style="font-size:15px;"> Kraken USD Volume Summary: </h1>
        <p> Kraken Current 24H USD Volume: {} </p>
        <p> Kraken 24H USD Volume Change: {} </p>
+       <p> Kraken 7D Mean USD Volume Change: {} </p>
+       <p> Kraken 30D Mean USD Volume Change: {} </p>
+       <p> Kraken 90D Mean USD Volume Change: {} </p>
        <h3 style="font-size:15px;"> Kraken TIckers Breakdown: </h3>
-       <p>
-            {}
-       </p>
-        <h4 style="font-size:15px;"> Relative Changes 7d VS 30d && 7d VS 90d </h4>
        <p>
             {}
        </p>
        </body>
      </html>
            """.format(value_type_convert(vol_total), value_type_convert(vol_total_delta),
-                      value_type_convert(vol_bf), value_type_convert(vol_bf_delta), bf_report,
-                      value_type_convert(vol_cb),value_type_convert(vol_cb_delta), cb_report,
-                      value_type_convert(vol_kr),value_type_convert(vol_kr_delta), kr_report,
-                      relative_per_report)
+                      value_type_convert(delta_total[0])+" ("+ value_type_convert(delta_total[1])+"%)",
+                      value_type_convert(delta_total[2]) + " (" + value_type_convert(delta_total[3]) + "%)",
+                      value_type_convert(delta_total[4]) + " (" + value_type_convert(delta_total[5]) + "%)",
+                      relative_per_report,
+                      value_type_convert(vol_bf), value_type_convert(vol_bf_delta),
+                      value_type_convert(delta_bf[0]) + " (" + value_type_convert(delta_bf[1]) + "%)",
+                      value_type_convert(delta_bf[2]) + " (" + value_type_convert(delta_bf[3]) + "%)",
+                      value_type_convert(delta_bf[4]) + " (" + value_type_convert(delta_bf[5]) + "%)",
+                      bf_report,
+                      value_type_convert(vol_cb),value_type_convert(vol_cb_delta),
+                      value_type_convert(delta_cb[0]) + " (" + value_type_convert(delta_cb[1]) + "%)",
+                      value_type_convert(delta_cb[2]) + " (" + value_type_convert(delta_cb[3]) + "%)",
+                      value_type_convert(delta_cb[4]) + " (" + value_type_convert(delta_cb[5]) + "%)",
+                      cb_report,
+                      value_type_convert(vol_kr),value_type_convert(vol_kr_delta),
+                      value_type_convert(delta_kr[0]) + " (" + value_type_convert(delta_kr[1]) + "%)",
+                      value_type_convert(delta_kr[2]) + " (" + value_type_convert(delta_kr[3]) + "%)",
+                      value_type_convert(delta_kr[4]) + " (" + value_type_convert(delta_kr[5]) + "%)",
+                      kr_report,
+                      )
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
     smtp = smtplib.SMTP('smtp.gmail.com', 587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com", "921211@Rx")
-    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
 
-usd_volume_report()
+#usd_volume_report()
 
-
-'''''
 if __name__ == "__main__":
     #usd_volume_report()
     while True:
         #time.sleep(60*60*24)
-        if checkIfUTCMidnight():
+        if checkIfUTCMidnight() or checkIfMorning():
             try:
                 usd_volume_report()
             except:
                 time.sleep(60*60)
                 usd_volume_report()
-'''
+
