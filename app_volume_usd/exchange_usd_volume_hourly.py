@@ -76,7 +76,7 @@ def usd_volume_report():
         # except IndexError:
         #    data_new = {t: float(data['volume']) * float(data['last'])}
         #    write_data(measurement, data_new, "coinbase")
-        volume_bn = float(data['volume']) * float(data['last'])
+        volume_bn = float(up["quoteVolume"])
         # data_delta_cb.update({t: value_type_convert(volume - data_prev)})
         # try:
         #    data_delta_percentage_cb.update({t: value_type_convert((volume_bn - data_prev) / data_prev * 100) + "%"})
