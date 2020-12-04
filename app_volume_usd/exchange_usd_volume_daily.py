@@ -53,8 +53,6 @@ def get_vol_7d(exchange,symbol):
         numPeriod += 1
         vol_tot += float(db["volume"])
     vol_7d = vol_tot / numPeriod
-    print(vol_tot)
-    print(numPeriod)
     return vol_7d
 
 def get_vol_30d(exchange,symbol):
@@ -65,8 +63,6 @@ def get_vol_30d(exchange,symbol):
         numPeriod += 1
         vol_tot += float(db["volume"])
     vol_30d = vol_tot / numPeriod
-    print(vol_tot)
-    print(numPeriod)
     return vol_30d
 
 def get_vol_90d(exchange,symbol):
@@ -77,8 +73,6 @@ def get_vol_90d(exchange,symbol):
         numPeriod += 1
         vol_tot += float(db["volume"])
     vol_90d = vol_tot / numPeriod
-    print(vol_tot)
-    print(numPeriod)
     return vol_90d
 
 def get_relative_percentage(exchange,symbol):
@@ -116,10 +110,6 @@ def get_delta_percentage(exchange,symbol,vol_total):
     vol_total_delta_90d_per = (vol_total - get_vol_90d(exchange,symbol))/get_vol_90d(exchange,symbol)*100
     return [vol_total_delta_7d, vol_total_delta_7d_per, vol_total_delta_30d, vol_total_delta_30d_per, vol_total_delta_90d, vol_total_delta_90d_per]
 
-def get_binance_report():
-    # binance
-    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
-    print(usdt_pairs)
 
 def usd_volume_report():
     # bitfinex
@@ -133,7 +123,6 @@ def usd_volume_report():
     data_bf_delta_7d_per = {}
     data_bf_delta_30d_per = {}
     data_bf_delta_90d_per = {}
-    volume_bf = 0
     vol_bf = 0
     data = bapi.get_public_tickers("ALL")
     for d in data:
@@ -176,6 +165,65 @@ def usd_volume_report():
             pass
     write_data(measurement, data_bf_db, "bitfinex")
 
+    # binance
+    data_bn = {}
+    data_bn_db = {}
+    data_delta_bn = {}
+    data_delta_percentage_bn = {}
+    data_bn_delta_7d = {}
+    data_bn_delta_30d = {}
+    data_bn_delta_90d = {}
+    data_bn_delta_7d_per = {}
+    data_bn_delta_30d_per = {}
+    data_bn_delta_90d_per = {}
+    vol_bn = 0
+    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
+    for up in usdt_pairs:
+        print(up)
+        t = up["symbol"]
+        try:
+            data_prev_bn = host_2.query_tables(measurement, ["*","where exchange = 'binance' and symbol = '{}' and time >= now() - 1d order by time limit 1".format(t)], "raw")[0]['volume']
+        except IndexError:
+            data_prev_bn = float(up["quoteVolume"])
+            fields = {}
+            tags = {}
+            fields.update({"volume": data_prev_bn})
+            tags.update({"symbol": t})
+            tags.update({"exchange": "binance"})
+            dbtime = False
+            host_2.write_points_to_measurement(measurement, dbtime, tags, fields)
+        data_prev_7d_bn = get_vol_7d("binance",t)
+        data_prev_30d_bn = get_vol_30d("binance",t)
+        data_prev_90d_bn = get_vol_90d("binance",t)
+        try:
+            volume_bn = float(up["quoteVolume"])
+        except:
+            volume_bn = 0
+        data_delta_bn.update({t: value_type_convert(volume_bn - data_prev_bn)})
+        data_bn_delta_7d.update({t:value_type_convert(volume_bn - data_prev_7d_bn)})
+        data_bn_delta_30d.update({t: value_type_convert(volume_bn - data_prev_30d_bn)})
+        data_bn_delta_90d.update({t: value_type_convert(volume_bn - data_prev_90d_bn)})
+        try:
+            data_delta_percentage_bn.update({t: value_type_convert((volume_bn - data_prev_bn) / data_prev_bn * 100) + "%"})
+        except:
+            data_delta_percentage_bn.update({t: str(0.00) + "%"})
+        try:
+            data_bn_delta_7d_per.update({t:value_type_convert((volume_bn - data_prev_7d_bn) / data_prev_7d_bn * 100) + "%"})
+        except:
+            data_bn_delta_7d_per.update({t: str(0.00) + "%"})
+        try:
+            data_bn_delta_30d_per.update({t:value_type_convert((volume_bn - data_prev_30d_bn) / data_prev_30d_bn * 100) + "%"})
+        except:
+            data_bn_delta_30d_per.update({t: str(0.00) + "%"})
+        try:
+            data_bn_delta_90d_per.update({t: value_type_convert((volume_bn - data_prev_90d_bn) / data_prev_90d_bn * 100) + "%"})
+        except:
+            data_bn_delta_90d_per.update({t: str(0.00) + "%"})
+        vol_bn += volume_bn
+        data_bn.update({t: value_type_convert(volume_bn)})
+        data_bn_db.update({t: volume_bn})
+    write_data(measurement, data_bn_db, "binance")
+
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
@@ -208,32 +256,32 @@ def usd_volume_report():
         data_prev_30d_cb = get_vol_30d("coinbase",t)
         data_prev_90d_cb = get_vol_90d("coinbase",t)
         try:
-            volume = float(data['volume']) * float(data['last'])
+            volume_cb = float(data['volume']) * float(data['last'])
         except:
-            volume = 0
-        data_delta_cb.update({t: value_type_convert(volume - data_prev_cb)})
-        data_cb_delta_7d.update({t:value_type_convert(volume - data_prev_7d_cb)})
-        data_cb_delta_30d.update({t: value_type_convert(volume - data_prev_30d_cb)})
-        data_cb_delta_90d.update({t: value_type_convert(volume - data_prev_90d_cb)})
+            volume_cb = 0
+        data_delta_cb.update({t: value_type_convert(volume_cb - data_prev_cb)})
+        data_cb_delta_7d.update({t:value_type_convert(volume_cb - data_prev_7d_cb)})
+        data_cb_delta_30d.update({t: value_type_convert(volume_cb - data_prev_30d_cb)})
+        data_cb_delta_90d.update({t: value_type_convert(volume_cb - data_prev_90d_cb)})
         try:
-            data_delta_percentage_cb.update({t: value_type_convert((volume - data_prev_cb) / data_prev_cb * 100) + "%"})
+            data_delta_percentage_cb.update({t: value_type_convert((volume_cb - data_prev_cb) / data_prev_cb * 100) + "%"})
         except:
             data_delta_percentage_cb.update({t: str(0.00) + "%"})
         try:
-            data_cb_delta_7d_per.update({t:value_type_convert((volume - data_prev_7d_cb) / data_prev_7d_cb * 100) + "%"})
+            data_cb_delta_7d_per.update({t:value_type_convert((volume_cb - data_prev_7d_cb) / data_prev_7d_cb * 100) + "%"})
         except:
             data_cb_delta_7d_per.update({t: str(0.00) + "%"})
         try:
-            data_cb_delta_30d_per.update({t:value_type_convert((volume - data_prev_30d_cb) / data_prev_30d_cb * 100) + "%"})
+            data_cb_delta_30d_per.update({t:value_type_convert((volume_cb - data_prev_30d_cb) / data_prev_30d_cb * 100) + "%"})
         except:
             data_cb_delta_30d_per.update({t: str(0.00) + "%"})
         try:
-            data_cb_delta_90d_per.update({t: value_type_convert((volume - data_prev_90d_cb) / data_prev_90d_cb * 100) + "%"})
+            data_cb_delta_90d_per.update({t: value_type_convert((volume_cb - data_prev_90d_cb) / data_prev_90d_cb * 100) + "%"})
         except:
             data_cb_delta_90d_per.update({t: str(0.00) + "%"})
-        vol_cb += volume
-        data_cb.update({t: value_type_convert(volume)})
-        data_cb_db.update({t: volume})
+        vol_cb += volume_cb
+        data_cb.update({t: value_type_convert(volume_cb)})
+        data_cb_db.update({t: volume_cb})
     write_data(measurement, data_cb_db, "coinbase")
 
     # Kraken
@@ -271,40 +319,42 @@ def usd_volume_report():
         data_prev_7d_kr = get_vol_7d("kraken",t)
         data_prev_30d_kr = get_vol_30d("kraken",t)
         data_prev_90d_kr = get_vol_90d("kraken",t)
-        volume = float(data[0]["v"][0])* float(data[0]['c'][0])
-        data_delta_kr.update({t: value_type_convert(volume - data_prev_kr)})
-        data_kr_delta_7d.update({t:value_type_convert(volume - data_prev_7d_kr)})
-        data_kr_delta_30d.update({t:value_type_convert(volume-data_prev_30d_kr)})
-        data_kr_delta_90d.update({t:value_type_convert(volume-data_prev_90d_kr)})
+        volume_kr = float(data[0]["v"][0])* float(data[0]['c'][0])
+        data_delta_kr.update({t: value_type_convert(volume_kr - data_prev_kr)})
+        data_kr_delta_7d.update({t:value_type_convert(volume_kr - data_prev_7d_kr)})
+        data_kr_delta_30d.update({t:value_type_convert(volume_kr-data_prev_30d_kr)})
+        data_kr_delta_90d.update({t:value_type_convert(volume_kr-data_prev_90d_kr)})
         try:
-            data_delta_percentage_kr.update({t: value_type_convert((volume - data_prev_kr) / data_prev_kr * 100) + "%"})
+            data_delta_percentage_kr.update({t: value_type_convert((volume_kr - data_prev_kr) / data_prev_kr * 100) + "%"})
         except:
             data_delta_percentage_kr.update({t: str(0.00) + "%"})
         try:
-            data_kr_delta_7d_per.update({t: value_type_convert((volume - data_prev_7d_kr) / data_prev_7d_kr * 100) + "%"})
+            data_kr_delta_7d_per.update({t: value_type_convert((volume_kr - data_prev_7d_kr) / data_prev_7d_kr * 100) + "%"})
         except:
             data_kr_delta_7d_per.update({t: str(0.00) + "%"})
         try:
-            data_kr_delta_30d_per.update({t: value_type_convert((volume - data_prev_30d_kr) / data_prev_30d_kr * 100) + "%"})
+            data_kr_delta_30d_per.update({t: value_type_convert((volume_kr - data_prev_30d_kr) / data_prev_30d_kr * 100) + "%"})
         except:
             data_kr_delta_30d_per.update({t: str(0.00) + "%"})
         try:
-            data_kr_delta_90d_per.update({t: value_type_convert((volume - data_prev_90d_kr) / data_prev_90d_kr * 100) + "%"})
+            data_kr_delta_90d_per.update({t: value_type_convert((volume_kr - data_prev_90d_kr) / data_prev_90d_kr * 100) + "%"})
         except:
             data_kr_delta_90d_per.update({t: str(0.00) + "%"})
-        vol_kr += volume
-        data_kr.update({t: value_type_convert(volume)})
-        data_kr_db.update({t: volume})
+        vol_kr += volume_kr
+        data_kr.update({t: value_type_convert(volume_kr)})
+        data_kr_db.update({t: volume_kr})
     write_data(measurement, data_kr_db, "kraken")
     # Aggregate
-    vol_total = vol_cb + vol_kr + vol_bf
-    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
+    vol_total = vol_cb + vol_kr + vol_bf + vol_bn
+    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf, "vol_bn":vol_bn}
     write_data(measurement, data_total, "agg")
     vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
-    vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
+    vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bn' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
+    vol_bn_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1d order by time limit 1"],"raw")[0]['volume']
     vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
     vol_kr_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_kr' and time >= now() - 1d order by time limit 1"], "raw")[0]['volume']
-    symbol = ["vol_bf", "vol_cb", "vol_kr"]
+
+    symbol = ["vol_bf", "vol_bn","vol_cb", "vol_kr"]
     df_pers = []
     for symb in symbol:
         df_per = get_relative_percentage("agg",symb)
@@ -317,6 +367,9 @@ def usd_volume_report():
     # bitfinex delta & percentage
     vol_bf_delta = vol_bf - vol_bf_prev
     delta_bf = get_delta_percentage("agg","vol_bf",vol_bf)
+    # binance delta & percentage
+    vol_bn_delta = vol_bn - vol_bn_prev
+    delta_bn = get_delta_percentage("agg","vol_bn",vol_bf)
     # coinbase delta & percentage
     vol_cb_delta = vol_cb - vol_cb_prev
     delta_cb = get_delta_percentage("agg","vol_cb",vol_cb)
@@ -327,13 +380,22 @@ def usd_volume_report():
     df_bitfinex = pd.DataFrame([data_bf, data_bf_delta, data_delta_percentage_bf, data_bf_delta_7d,data_bf_delta_7d_per,
                                 data_bf_delta_30d,data_bf_delta_30d_per,data_bf_delta_90d,data_bf_delta_90d_per],
                                 index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
+    #df_bitfinex = df_bitfinex_temp.sort_values(by=["1D%"],axis=1)
+    df_binance = pd.DataFrame([data_bn, data_delta_bn, data_delta_percentage_bn, data_bn_delta_7d,data_bn_delta_7d_per,
+                                data_bn_delta_30d,data_bn_delta_30d_per,data_bn_delta_90d,data_bn_delta_90d_per],
+                                index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
+    #df_binance = df_binance_temp.sort_values(by=["1D%"],axis=1)
     df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb, data_cb_delta_7d,data_cb_delta_7d_per,
                                 data_cb_delta_30d, data_cb_delta_30d_per, data_cb_delta_90d, data_cb_delta_90d_per],
                                 index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
+    #df_coinbase = df_coinbase_temp.sort_values(by=["1D%"],axis=1)
     df_kraken = pd.DataFrame([data_kr, data_delta_kr, data_delta_percentage_kr,data_kr_delta_7d, data_kr_delta_7d_per,
                               data_kr_delta_30d, data_kr_delta_30d_per, data_kr_delta_90d, data_kr_delta_90d_per],
                              index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
+    #df_kraken = df_kraken_temp.sort_values(by=["1D%"],axis=1)
+
     bf_report = df_bitfinex.to_html()
+    bn_report = df_binance.to_html()
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
 
@@ -365,6 +427,16 @@ def usd_volume_report():
        <p> Bitfinex 30D Mean USD Volume Change: {} </p>
        <p> Bitfinex 90D Mean USD Volume Change: {} </p>
        <h3 style="font-size:15px;"> Bitfinex Tickers Breakdown: </h3>
+       <p>
+            {}
+       </p>
+        <h1 style="font-size:15px;"> Binance USD Volume Summary: </h1>
+       <p> Bitfinex Current 24H USD Volume: {} </p>
+       <p> Bitfinex 24H USD Volume Change: {} </p>
+       <p> Bitfinex 7D Mean USD Volume Change: {} </p>
+       <p> Bitfinex 30D Mean USD Volume Change: {} </p>
+       <p> Bitfinex 90D Mean USD Volume Change: {} </p>
+       <h3 style="font-size:15px;"> Binance Tickers Breakdown: </h3>
        <p>
             {}
        </p>
@@ -400,6 +472,11 @@ def usd_volume_report():
                       value_type_convert(delta_bf[2]) + " (" + value_type_convert(delta_bf[3]) + "%)",
                       value_type_convert(delta_bf[4]) + " (" + value_type_convert(delta_bf[5]) + "%)",
                       bf_report,
+                      value_type_convert(vol_bn), value_type_convert(vol_bn_delta),
+                      value_type_convert(delta_bn[0]) + " (" + value_type_convert(delta_bn[1]) + "%)",
+                      value_type_convert(delta_bn[2]) + " (" + value_type_convert(delta_bn[3]) + "%)",
+                      value_type_convert(delta_bn[4]) + " (" + value_type_convert(delta_bn[5]) + "%)",
+                      bn_report,
                       value_type_convert(vol_cb),value_type_convert(vol_cb_delta),
                       value_type_convert(delta_cb[0]) + " (" + value_type_convert(delta_cb[1]) + "%)",
                       value_type_convert(delta_cb[2]) + " (" + value_type_convert(delta_cb[3]) + "%)",
@@ -417,14 +494,14 @@ def usd_volume_report():
     smtp = smtplib.SMTP('smtp.gmail.com', 587)
     smtp.starttls()
     smtp.login("vpfa.reports@gmail.com", "921211@Rx")
-    #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
-    smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
+    smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
+    #smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
-#get_binance_report()
+
 #usd_volume_report()
 
-'''''
+
 if __name__ == "__main__":
     #usd_volume_report()
     while True:
@@ -435,4 +512,4 @@ if __name__ == "__main__":
             except:
                 time.sleep(60*60)
                 usd_volume_report()
-'''
+
