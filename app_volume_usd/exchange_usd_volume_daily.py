@@ -319,13 +319,13 @@ def usd_volume_report():
 
     df_bitfinex = pd.DataFrame([data_bf, data_bf_delta, data_delta_percentage_bf, data_bf_delta_7d,data_bf_delta_7d_per,
                                 data_bf_delta_30d,data_bf_delta_30d_per,data_bf_delta_90d,data_bf_delta_90d_per],
-                                index=['volume', '1D', '1D%','7D', '7D%','30D', '30D%','90D', '90D%']).T
+                                index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
     df_coinbase = pd.DataFrame([data_cb, data_delta_cb, data_delta_percentage_cb, data_cb_delta_7d,data_cb_delta_7d_per,
                                 data_cb_delta_30d, data_cb_delta_30d_per, data_cb_delta_90d, data_cb_delta_90d_per],
-                                index=['volume', '1D', '1D%','7D', '7D%','30D', '30D%','90D', '90D%']).T
+                                index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
     df_kraken = pd.DataFrame([data_kr, data_delta_kr, data_delta_percentage_kr,data_kr_delta_7d, data_kr_delta_7d_per,
                               data_kr_delta_30d, data_kr_delta_30d_per, data_kr_delta_90d, data_kr_delta_90d_per],
-                             index=['volume', '1D', '1D%','7D', '7D%','30D', '30D%','90D', '90D%']).T
+                             index=['volume', '1D_diff', '1D%','7D_diff', '7D%','30D_diff', '30D%','90D_diff', '90D%']).T
     bf_report = df_bitfinex.to_html()
     cb_report = df_coinbase.to_html()
     kr_report = df_kraken.to_html()
