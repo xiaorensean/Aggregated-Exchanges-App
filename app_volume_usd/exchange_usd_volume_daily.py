@@ -15,6 +15,7 @@ sys.path.append(os.path.dirname(current_dir))
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
 from api_bitfinex.BfxRest import BITFINEXCLIENT
+from api_binance.BinanceRestApi import get_spot24
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
@@ -115,6 +116,11 @@ def get_delta_percentage(exchange,symbol,vol_total):
     vol_total_delta_90d_per = (vol_total - get_vol_90d(exchange,symbol))/get_vol_90d(exchange,symbol)*100
     return [vol_total_delta_7d, vol_total_delta_7d_per, vol_total_delta_30d, vol_total_delta_30d_per, vol_total_delta_90d, vol_total_delta_90d_per]
 
+def get_binance_report():
+    # binance
+    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
+    print(usdt_pairs)
+
 def usd_volume_report():
     # bitfinex
     data_bf = {}
@@ -169,6 +175,7 @@ def usd_volume_report():
         else:
             pass
     write_data(measurement, data_bf_db, "bitfinex")
+
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
     data_cb = {}
@@ -414,8 +421,8 @@ def usd_volume_report():
     smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
-
-usd_volume_report()
+get_binance_report()
+#usd_volume_report()
 
 '''''
 if __name__ == "__main__":

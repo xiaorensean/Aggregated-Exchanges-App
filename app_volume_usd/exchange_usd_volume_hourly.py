@@ -116,6 +116,7 @@ def usd_volume_report():
         data_kr.update({t: value_type_convert(volume)})
         data_kr_db.update({t: volume})
     write_data(measurement, data_kr_db, "kraken")
+'''''
     # Aggregate
     vol_total = vol_cb + vol_kr + vol_bf
     data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
@@ -186,7 +187,7 @@ def usd_volume_report():
     #smtp.sendmail("report",["vpfa.reports@gmail.com","nasir@virgilqr.com"], msg.as_string())
     smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
-
+'''''
     
 
 if __name__ == "__main__":

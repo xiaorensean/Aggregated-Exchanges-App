@@ -11,7 +11,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 sys.path.append(os.path.dirname(current_dir))
 from api_bitfinex.BfxRest import BITFINEXCLIENT
-import api_coinbase.coinbaseRestApi as coinbase 
+from api_binance.BinanceRestApi import get_spot24
+import api_coinbase.coinbaseRestApi as coinbase
 import api_kraken.KrakenRestApi as kraken
 
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
@@ -46,6 +47,18 @@ def usd_volume_collector():
         else:
             pass
     write_data(measurement,data_bf,"bitfinex")
+
+    # Binance
+    data_bn = {}
+    vol_bn = 0
+    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
+    for up in usdt_pairs:
+        if "USDT" in up["symbol"]:
+            vol_bn += float(up["quoteVolume"])
+            data_bn.update({up["symbol"]:up["quoteVolume"]})
+        else:
+            pass
+    write_data(measurement,data_bn,"binance")
 
     # Coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]

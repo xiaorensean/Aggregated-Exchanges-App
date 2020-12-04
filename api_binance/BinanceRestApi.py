@@ -23,6 +23,7 @@ def get_futures_tickers():
     data = response.json()
     return data
 
+
 def get_future_stats_open_interest(symbol,period,start_ts=None,end_ts=None):
     if start_ts is not None and end_ts is not None:
         endpoint = base_url_future + "futures/data/openInterestHist?symbol={}&period={}&limit=500&startTime={}&endTime={}".format(symbol,period,start_ts,end_ts)
@@ -68,8 +69,11 @@ def get_future_stats_taker_buy_sell_volume(symbol,period,start_ts=None,end_ts=No
     data = response.json()
     return data
 
-def get_spot24(symbol):
-    url = base_url_spot + "/api/v3/ticker/24hr?symbol={}".format(symbol)
+def get_spot24(symbol=None):
+    if symbol is not None:
+        url = base_url_spot + "/api/v3/ticker/24hr?symbol={}".format(symbol)
+    else:
+        url = base_url_spot + "/api/v3/ticker/24hr"
     response = requests.get(url)
     data = response.json()
     return data
@@ -162,9 +166,11 @@ def get_funding_rates(symbol,limit):
     return data
 
 if __name__ == "__main__":
-    future_tickers = get_exchange_info_future_stats()
-    data = get_future_stats_long_short_ratio_global("BTCUSDT",'5m',1586132700000-60*60*24*1000,1586132700000)
-    a = get_trades("SOLBUSD","s")
+    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
+    print(usdt_pairs)
+    #future_tickers = get_exchange_info_future_stats()
+    #data = get_future_stats_long_short_ratio_global("BTCUSDT",'5m',1586132700000-60*60*24*1000,1586132700000)
+    #a = get_trades("SOLBUSD","s")
     #data = get_future_stats_taker_buy_sell_volume("BTCUSDT",'5m',1586132700000-60*60*24*1000,1586132700000)
     #a = post_long_short_ratio_position("EOSUSDT",5)['data']
     #a1 = post_long_short_ratio_account("EOSUSDT",5)['data']
