@@ -14,6 +14,8 @@ sys.path.append(os.path.dirname(current_dir))
 import api_coinbase.coinbaseRestApi as coinbase 
 import api_kraken.KrakenRestApi as kraken
 from api_bitfinex.BfxRest import BITFINEXCLIENT
+from api_binance.BinanceRestApi import get_spot24
+
 from influxdb_client.influxdb_client_host_2 import InfluxClientHost2
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
@@ -39,88 +41,115 @@ def write_data(measurement,data,exchange_tag):
 
 def usd_volume_report():
     # bitfinex
-    data_bf = {}
-    data_bf_db = {}
-    data_bf_delta = {}
-    data_delta_percentage_bf = {}
+    #data_bf = {}
+    #data_bf_db = {}
+    #data_bf_delta = {}
+    #data_delta_percentage_bf = {}
     vol_bf = 0
     data = bapi.get_public_tickers("ALL")
     for d in data:
         if "USD" in d[0] and d[0] != "fUSD":
             print(d[0], float(d[8]) * float(d[7]))
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'bitfinex' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(d[0])], "raw")[0]['volume']
+            #data_prev = host_2.query_tables(measurement, ["*","where exchange = 'bitfinex' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(d[0])], "raw")[0]['volume']
             volume = float(d[8]) * float(d[7])
-            data_bf_delta.update({d[0]:value_type_convert(volume-data_prev)})
-            try:
-                data_delta_percentage_bf.update({d[0]: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
-            except:
-                data_delta_percentage_bf.update({d[0]: str(0.00) + "%"})
+            #data_bf_delta.update({d[0]:value_type_convert(volume-data_prev)})
+            #try:
+            #    data_delta_percentage_bf.update({d[0]: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
+            #except:
+            #    data_delta_percentage_bf.update({d[0]: str(0.00) + "%"})
             vol_bf += volume
-            data_bf.update({d[0]: value_type_convert(volume)})
-            data_bf_db.update({d[0]: volume})
+            #data_bf.update({d[0]: value_type_convert(volume)})
+            #data_bf_db.update({d[0]: volume})
         else:
             pass
-    write_data(measurement, data_bf_db, "bitfinex")
+    #write_data(measurement, data_bf_db, "bitfinex")
+
+    # binance
+    data_bf = {}
+    #data_bn_db = {}
+    volume_bn = 0
+    vol_bn = 0
+    usdt_pairs = [i for i in get_spot24() if "USDT" in i["symbol"]]
+    for up in usdt_pairs:
+        # try:
+        #    data_prev = host_2.query_tables(measurement, ["*","where exchange = 'binance' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+        # except IndexError:
+        #    data_new = {t: float(data['volume']) * float(data['last'])}
+        #    write_data(measurement, data_new, "coinbase")
+        volume_bn = float(data['volume']) * float(data['last'])
+        # data_delta_cb.update({t: value_type_convert(volume - data_prev)})
+        # try:
+        #    data_delta_percentage_cb.update({t: value_type_convert((volume_bn - data_prev) / data_prev * 100) + "%"})
+        # except:
+        #    data_delta_percentage_cb.update({t: str(0.00) + "%"})
+        vol_bn += volume_bn
+        # data_cb.update({t: value_type_convert(volume)})
+        #data_bn_db.update({up["symbol"]: volume_bn})
+    #write_data(measurement, data_bn_db, "binance")
+
+
     # coinbase
     ticker_cb = [t['id'] for t in coinbase.get_tickers() if t['quote_currency'] == "USD"]
-    data_cb = {}
-    data_cb_db = {}
-    data_delta_cb = {}
-    data_delta_percentage_cb = {}
+    #data_cb = {}
+    #data_cb_db = {}
+    #data_delta_cb = {}
+    #data_delta_percentage_cb = {}
     vol_cb = 0
     for t in ticker_cb:
         print(t)
         time.sleep(2)
         data = coinbase.get_market_stats(t)
-        try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-        except IndexError:
-            data_new = {t: float(data['volume']) * float(data['last'])}
-            write_data(measurement, data_new, "coinbase")
+        #try:
+        #    data_prev = host_2.query_tables(measurement, ["*","where exchange = 'coinbase' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+        #except IndexError:
+        #    data_new = {t: float(data['volume']) * float(data['last'])}
+        #    write_data(measurement, data_new, "coinbase")
         volume = float(data['volume']) * float(data['last'])
-        data_delta_cb.update({t: value_type_convert(volume - data_prev)})
-        try:
-            data_delta_percentage_cb.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
-        except:
-            data_delta_percentage_cb.update({t: str(0.00) + "%"})
+        #data_delta_cb.update({t: value_type_convert(volume - data_prev)})
+        #try:
+        #    data_delta_percentage_cb.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
+        #except:
+        #    data_delta_percentage_cb.update({t: str(0.00) + "%"})
         vol_cb += volume
-        data_cb.update({t: value_type_convert(volume)})
-        data_cb_db.update({t: volume})
-    write_data(measurement, data_cb_db, "coinbase")
+        #data_cb.update({t: value_type_convert(volume)})
+        #data_cb_db.update({t: volume})
+    #write_data(measurement, data_cb_db, "coinbase")
 
     # Kraken
     tickers_kr = [kraken.get_asset_pairs_info()[i] for i in kraken.get_asset_pairs_info()]
     ticker_kr = [i['altname'] for i in tickers_kr if
                  i['quote'] == "ZUSD" and i['altname'] != 'ETHUSD.d' and i['altname'] != 'XBTUSD.d' and i[
                      'altname'] != 'GBPUSD' and i['altname'] != 'EURUSD']
-    data_kr = {}
-    data_kr_db = {}
-    data_delta_kr = {}
-    data_delta_percentage_kr = {}
+    #data_kr = {}
+    #data_kr_db = {}
+    #data_delta_kr = {}
+    #data_delta_percentage_kr = {}
     vol_kr = 0
     for t in ticker_kr:
         time.sleep(0.001)
         data = [kraken.get_tickers(t)[i] for i in kraken.get_tickers(t)]
-        try:
-            data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
-        except IndexError:
-            data_new = {t: float(data['volume']) * float(data['last'])}
-            write_data(measurement, data_new, "kraken")
+        #try:
+        #    data_prev = host_2.query_tables(measurement, ["*","where exchange = 'kraken' and symbol = '{}' and time >= now() - 1h order by time limit 1".format(t)], "raw")[0]['volume']
+        #except IndexError:
+        #    data_new = {t: float(data['volume']) * float(data['last'])}
+        #    write_data(measurement, data_new, "kraken")
         volume = float(data[0]['v'][1]) * float(data[0]['c'][0])
-        data_delta_kr.update({t: value_type_convert(volume - data_prev)})
-        try:
-            data_delta_percentage_kr.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
-        except:
-            data_delta_percentage_kr.update({t: str(0.00) + "%"})
+        #data_delta_kr.update({t: value_type_convert(volume - data_prev)})
+        #try:
+        #    data_delta_percentage_kr.update({t: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
+        #except:
+        #    data_delta_percentage_kr.update({t: str(0.00) + "%"})
         vol_kr += volume
-        data_kr.update({t: value_type_convert(volume)})
-        data_kr_db.update({t: volume})
-    write_data(measurement, data_kr_db, "kraken")
-'''''
+        #data_kr.update({t: value_type_convert(volume)})
+        #data_kr_db.update({t: volume})
+    #write_data(measurement, data_kr_db, "kraken")
+
+
     # Aggregate
-    vol_total = vol_cb + vol_kr + vol_bf
-    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf}
+    vol_total = vol_cb + vol_kr + vol_bf + vol_bn
+    data_total = {"vol_total": vol_total, "vol_cb": vol_cb, "vol_kr": vol_kr, "vol_bf":vol_bf, "vol_bn":vol_bn}
     write_data(measurement, data_total, "agg")
+'''''
     vol_total_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_total' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
     vol_bf_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_bf' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']
     vol_cb_prev = host_2.query_tables(measurement, ["*","where exchange = 'agg' and symbol = 'vol_cb' and time >= now() - 1h order by time limit 1"], "raw")[0]['volume']

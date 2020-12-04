@@ -133,7 +133,7 @@ def usd_volume_report():
     data_bf_delta_7d_per = {}
     data_bf_delta_30d_per = {}
     data_bf_delta_90d_per = {}
-
+    volume_bf = 0
     vol_bf = 0
     data = bapi.get_public_tickers("ALL")
     for d in data:
@@ -143,35 +143,35 @@ def usd_volume_report():
             data_prev_7d = get_vol_7d("bitfinex",d[0])
             data_prev_30d = get_vol_30d("bitfinex",d[0])
             data_prev_90d = get_vol_90d("bitfinex", d[0])
-            volume = float(d[8]) * float(d[7])
-            data_bf_delta.update({d[0]:value_type_convert(volume-data_prev)})
-            data_bf_delta_7d.update({d[0]:value_type_convert(volume-data_prev_7d)})
-            data_bf_delta_30d.update({d[0]: value_type_convert(volume - data_prev_30d)})
-            data_bf_delta_90d.update({d[0]: value_type_convert(volume - data_prev_90d)})
+            volume_bf = float(d[8]) * float(d[7])
+            data_bf_delta.update({d[0]:value_type_convert(volume_bf-data_prev)})
+            data_bf_delta_7d.update({d[0]:value_type_convert(volume_bf-data_prev_7d)})
+            data_bf_delta_30d.update({d[0]: value_type_convert(volume_bf - data_prev_30d)})
+            data_bf_delta_90d.update({d[0]: value_type_convert(volume_bf - data_prev_90d)})
             # Daily changes Percentage
             try:
-                data_delta_percentage_bf.update({d[0]: value_type_convert((volume - data_prev) / data_prev * 100) + "%"})
+                data_delta_percentage_bf.update({d[0]: value_type_convert((volume_bf - data_prev) / data_prev * 100) + "%"})
             except:
                 data_delta_percentage_bf.update({d[0]: str(0.00) + "%"})
             # 7d changes Percentage
             try:
-                data_bf_delta_7d_per.update({d[0]: value_type_convert((volume - data_prev_7d) / data_prev_7d * 100) + "%"})
+                data_bf_delta_7d_per.update({d[0]: value_type_convert((volume_bf - data_prev_7d) / data_prev_7d * 100) + "%"})
             except:
                 data_bf_delta_7d_per.update({d[0]: str(0.00) + "%"})
             # 30d changes Percentage
             try:
-                data_bf_delta_30d_per.update({d[0]: value_type_convert((volume - data_prev_30d) / data_prev_30d * 100) + "%"})
+                data_bf_delta_30d_per.update({d[0]: value_type_convert((volume_bf - data_prev_30d) / data_prev_30d * 100) + "%"})
             except:
                 data_bf_delta_30d_per.update({d[0]: str(0.00) + "%"})
             # 90d changes Percentage
             try:
-                data_bf_delta_90d_per.update({d[0]: value_type_convert((volume - data_prev_90d) / data_prev_90d * 100) + "%"})
+                data_bf_delta_90d_per.update({d[0]: value_type_convert((volume_bf - data_prev_90d) / data_prev_90d * 100) + "%"})
             except:
                 data_bf_delta_90d_per.update({d[0]: str(0.00) + "%"})
 
-            vol_bf += volume
-            data_bf.update({d[0]: value_type_convert(volume)})
-            data_bf_db.update({d[0]: volume})
+            vol_bf += volume_bf
+            data_bf.update({d[0]: value_type_convert(volume_bf)})
+            data_bf_db.update({d[0]: volume_bf})
         else:
             pass
     write_data(measurement, data_bf_db, "bitfinex")
