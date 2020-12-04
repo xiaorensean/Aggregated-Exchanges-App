@@ -55,7 +55,7 @@ def usd_volume_collector():
     for up in usdt_pairs:
         if "USDT" in up["symbol"]:
             vol_bn += float(up["quoteVolume"])
-            data_bn.update({up["symbol"]:up["quoteVolume"]})
+            data_bn.update({up["symbol"]:float(up["quoteVolume"])})
         else:
             pass
     write_data(measurement,data_bn,"binance")
