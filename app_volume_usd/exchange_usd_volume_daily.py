@@ -421,7 +421,7 @@ def usd_volume_report():
     smtp.sendmail("report", ["vpfa.reports@gmail.com"], msg.as_string())
     smtp.quit()
 
-get_binance_report()
+#get_binance_report()
 #usd_volume_report()
 
 '''''
