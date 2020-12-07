@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Aggregated-Exchanges-App.iml" filepath="$PROJECT_DIR$/.idea/Aggregated-Exchanges-App.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Market-Data-Kafka-Test/.idea/Market-Data-Kafka-Test.iml" filepath="$PROJECT_DIR$/../Market-Data-Kafka-Test/.idea/Market-Data-Kafka-Test.iml" />
     </modules>
   </component>
 </project>
