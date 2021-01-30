@@ -6,10 +6,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 
 # host name 
-#HOST_1_old = 'ec2-35-183-41-80.ca-central-1.compute.amazonaws.com'
-#HOST_2_old = 'ec2-35-183-244-102.ca-central-1.compute.amazonaws.com'
-HOST_1 = "ec2-35-183-117-153.ca-central-1.compute.amazonaws.com"
-HOST_2 = "ec2-35-182-170-72.ca-central-1.compute.amazonaws.com"
+HOST_1 = ""
+HOST_2 = ""
 
 # database name
 database = 'md_rates'
